@@ -4,7 +4,8 @@
 
 A visual command learning and script generation tool for LIGGGHTS/LAMMPS/PFC discrete element simulation programs.
 
-![1753095852851](image/README/1753095852851.png)
+![Uploading 1753095852851.png…]()
+
 
 ## 🎯 Purpose
 
