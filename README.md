@@ -4,6 +4,8 @@
 
 A visual command learning and script generation tool for LIGGGHTS/LAMMPS/PFC discrete element simulation programs.
 
+![1753095852851](image/README/1753095852851.png)
+
 ## 🎯 Purpose
 
 Provides a **blank command library framework** that encourages users to learn LIGGGHTS/LAMMPS syntax through creating their own command collections. Active learning is more effective than passive acceptance of preset commands.
