@@ -61,7 +61,6 @@ Provides a **blank command library framework** that encourages users to learn LI
 
 ### Discrete Element Method
 
-- [DEM Theory and Applications](https://link.springer.com/book/10.1007/978-3-540-44490-7)
 - [CFDem Project](https://www.cfdem.com/)
 
 ## 📄 License
