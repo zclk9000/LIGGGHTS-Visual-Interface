@@ -1,0 +1,4490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIGGGHTS 可视化界面</title>
+    <style>
+        :root {
+            /* 亮色主题 */
+            --bg-primary: #f5f5f5;
+            --bg-secondary: white;
+            --bg-tertiary: #f9fafb;
+            --bg-quaternary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --border-primary: #e5e5e5;
+            --border-secondary: #d1d5db;
+            --shadow-primary: rgba(0,0,0,0.1);
+            --shadow-secondary: rgba(0,0,0,0.2);
+        }
+
+        [data-theme="dark"] {
+            /* 暗色主题 */
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --bg-quaternary: #4b5563;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-tertiary: #9ca3af;
+            --border-primary: #374151;
+            --border-secondary: #4b5563;
+            --shadow-primary: rgba(0,0,0,0.3);
+            --shadow-secondary: rgba(0,0,0,0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .toolbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px var(--shadow-primary);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .toolbar h1 {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-right: 16px;
+            transition: color 0.3s ease;
+        }
+        
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-gray {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-gray:hover {
+            background: #4b5563;
+        }
+        
+        .btn-green {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-green:hover {
+            background: #059669;
+        }
+        
+        .btn-red {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-red:hover {
+            background: #dc2626;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .commands-panel {
+            flex: 1;
+            width: 33.333%;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .search-bar {
+            height: 56px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border-primary);
+            background: var(--bg-secondary);
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-bar h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            transition: color 0.3s ease;
+        }
+        
+        .search-bar .search-wrapper {
+            flex: 1;
+            max-width: 280px;
+            margin-left: 16px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            position: relative;
+            z-index: 5;
+            background: var(--bg-secondary);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .search-wrapper {
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .search-clear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .search-clear:hover {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .search-clear.show {
+            display: flex;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e5e5;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .tab-count {
+            background: #e5e7eb;
+            color: #6b7280;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+            line-height: 1.2;
+            margin-left: 4px;
+        }
+        
+        .tab.active .tab-count {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .tab:hover {
+            color: #374151;
+            background: #f3f4f6;
+        }
+        
+        .tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background: white;
+        }
+        
+        .tab.search-highlight {
+            background: #fef3c7;
+            color: #d97706;
+            border-bottom-color: #f59e0b;
+        }
+        
+        .tab.search-highlight.active {
+            background: #fbbf24;
+            color: white;
+            border-bottom-color: #f59e0b;
+        }
+        
+        .tab-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .commands-grid {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .commands-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-auto-rows: 120px;
+            gap: 12px;
+            padding: 16px;
+            min-height: 400px;
+        }
+        
+        .grid-cell {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.2s ease;
+            background: var(--bg-tertiary);
+            opacity: 0.3;
+        }
+        
+        .grid-cell.occupied {
+            border: 1px solid #e5e5e5;
+            background: var(--bg-secondary);
+            opacity: 1;
+        }
+        
+        .grid-cell.drop-target {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            opacity: 0.8;
+        }
+        
+        .grid-cell.drop-invalid {
+            border-color: #ef4444;
+            background: #fef2f2;
+            opacity: 0.8;
+        }
+        
+        .grid-cell.add-command {
+            border: 2px dashed #3b82f6;
+            background: var(--bg-tertiary);
+            opacity: 0.6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .grid-cell.add-command:hover {
+            opacity: 0.9;
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        
+        .add-command-icon {
+            font-size: 24px;
+            color: #3b82f6;
+            user-select: none;
+        }
+        
+        .command-card {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            bottom: 4px;
+            padding: 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .command-card .drag-handle {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            user-select: none;
+            font-size: 10px;
+            cursor: grab;
+            z-index: 10;
+        }
+        
+        .command-card .command-actions {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            display: flex;
+            gap: 2px;
+            z-index: 10;
+        }
+        
+        .command-card.selected .command-actions {
+            opacity: 1;
+        }
+        
+        .command-action-btn {
+            width: 16px;
+            height: 16px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .command-action-btn.edit {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .command-action-btn.edit:hover {
+            background: #d97706;
+        }
+        
+        .command-action-btn.delete {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .command-action-btn.delete:hover {
+            background: #dc2626;
+        }
+        
+        .command-card.dragging {
+            z-index: 1000;
+            opacity: 0.8;
+            transform: rotate(3deg) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .command-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .command-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+        }
+        
+        .command-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            font-size: 13px;
+            line-height: 1.2;
+        }
+        
+        .command-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            line-height: 1.2;
+            flex: 1;
+        }
+        
+        .command-params {
+            font-size: 9px;
+            color: var(--text-tertiary);
+            line-height: 1.1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .params-panel {
+            flex: 1;
+            width: 33.333%;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .params-header {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border-primary);
+            background: var(--bg-secondary);
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .params-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+        
+        .params-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            transition: background-color 0.3s ease;
+        }
+        
+        .params-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .command-info {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .command-info h3 {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+        
+        .command-info p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        .param-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .param-label {
+            font-size: 12px;
+            font-weight: 400;
+            color: #6b7280;
+            transition: color 0.3s ease;
+            margin-bottom: 4px;
+        }
+        
+        .param-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-secondary);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .param-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .add-command-btn {
+            width: 100%;
+            margin-top: 24px;
+            padding: 14px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+        
+        .add-command-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ca3af;
+            text-align: center;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .script-panel {
+            flex: 1;
+            width: 33.333%;
+            background: var(--bg-secondary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+        
+        .script-header {
+            height: 56px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border-primary);
+            background: var(--bg-secondary);
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .script-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+        
+        .script-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .script-info .btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+        
+        .script-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: var(--bg-secondary);
+            transition: background-color 0.3s ease;
+        }
+        
+        .script-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .script-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9fafb;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            group: hover;
+            cursor: move;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .script-line:hover {
+            background: #f3f4f6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .script-line.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .script-line.drag-over {
+            border-top: 2px solid #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .script-line .drag-handle {
+            cursor: grab;
+            color: #9ca3af;
+            margin-right: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .script-line:hover .drag-handle {
+            opacity: 1;
+        }
+        
+        .script-line .drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        .script-line.editing {
+            background: #fff;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .script-line.editing .drag-handle {
+            display: none;
+        }
+        
+        .script-line.editing .line-number {
+            color: #3b82f6;
+            min-width: 20px;
+            flex-shrink: 0;
+        }
+        
+        .script-line.editing .line-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .edit-input {
+            flex: 1;
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #1f2937;
+            padding: 2px 4px;
+            min-width: 0;
+        }
+        
+        .edit-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 1;
+        }
+        
+        .edit-btn {
+            padding: 2px 6px;
+            border: none;
+            border-radius: 3px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .edit-btn.save {
+            background: #10b981;
+            color: white;
+        }
+        
+        .edit-btn.save:hover {
+            background: #059669;
+        }
+        
+        .edit-btn.cancel {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .edit-btn.cancel:hover {
+            background: #4b5563;
+        }
+        
+        .script-line:hover .delete-btn {
+            opacity: 1;
+        }
+        
+        .delete-btn {
+            opacity: 0;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: opacity 0.2s;
+        }
+        
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+        
+        .script-actions {
+            padding: 16px;
+            border-top: 1px solid #e5e5e5;
+            background: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .drag-hint {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #6b7280;
+            padding: 8px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .drag-hint.hidden {
+            display: none;
+        }
+        
+        .step-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        
+        /* 颜色定义 */
+        .color-blue { background: #3b82f6; }
+        .color-green { background: #10b981; }
+        .color-purple { background: #8b5cf6; }
+        .color-orange { background: #f59e0b; }
+        .color-red { background: #ef4444; }
+        .color-indigo { background: #6366f1; }
+        .color-gray { background: #6b7280; }
+        
+        /* 步骤背景颜色 */
+        .step-init { background: #eff6ff; }          /* 初始化设置 - 浅蓝色 */
+        .step-geometry { background: #f0fdf4; }      /* 几何定义 - 浅绿色 */
+        .step-material { background: #faf5ff; }      /* 材料属性 - 浅紫色 */
+        .step-particle { background: #fff7ed; }      /* 颗粒设置 - 浅橙色 */
+        .step-solver { background: #fef2f2; }        /* 求解控制 - 浅红色 */
+        .step-output { background: #eef2ff; }        /* 输出控制 - 浅靛蓝色 */
+        .step-other { background: #f3f4f6; }         /* 其它设置 - 浅灰色 */
+        
+        /* 暗色主题额外样式 */
+        [data-theme="dark"] .tabs {
+            background: var(--bg-tertiary);
+        }
+        
+        [data-theme="dark"] .tab {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .tab.active {
+            background: var(--bg-secondary);
+            color: #3b82f6;
+        }
+        
+        [data-theme="dark"] .tab-count {
+            background: #374151;
+            color: #9ca3af;
+        }
+        
+        [data-theme="dark"] .tab.active .tab-count {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        [data-theme="dark"] .command-card {
+            background: var(--bg-tertiary);
+            border-color: var(--border-primary);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .command-card:hover {
+            background: var(--bg-quaternary);
+        }
+        
+        [data-theme="dark"] .search-input {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-secondary);
+        }
+        
+        [data-theme="dark"] .script-line {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .script-line:hover {
+            background: var(--bg-quaternary);
+        }
+        
+        /* 暗色主题下的步骤颜色 */
+        [data-theme="dark"] .step-init { background: #1e3a8a; }      /* 深蓝色 */
+        [data-theme="dark"] .step-geometry { background: #166534; }  /* 深绿色 */
+        [data-theme="dark"] .step-material { background: #581c87; }  /* 深紫色 */
+        [data-theme="dark"] .step-particle { background: #9a3412; }  /* 深橙色 */
+        [data-theme="dark"] .step-solver { background: #991b1b; }    /* 深红色 */
+        [data-theme="dark"] .step-output { background: #3730a3; }    /* 深靛蓝色 */
+        [data-theme="dark"] .step-other { background: #4b5563; }     /* 深灰色 */
+        
+        [data-theme="dark"] .script-info {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .empty-state {
+            color: var(--text-tertiary);
+        }
+        
+        [data-theme="dark"] .script-actions {
+            background: var(--bg-tertiary);
+            border-color: var(--border-primary);
+        }
+        
+        [data-theme="dark"] .search-icon {
+            color: var(--text-tertiary);
+        }
+        
+        [data-theme="dark"] .command-name {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .command-desc {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .command-params {
+            color: var(--text-tertiary);
+        }
+        
+        [data-theme="dark"] .param-label {
+            color: #d1d5db;
+        }
+        
+        /* 弹出式命令编辑器 */
+        .command-editor-overlay {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-primary);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 2000;
+            height: 50vh;
+            overflow: hidden;
+        }
+        
+        .command-editor-overlay.show {
+            transform: translateY(0);
+        }
+        
+        .command-editor-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-tertiary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .command-editor-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .command-editor-actions-header {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .command-editor-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .command-editor-close:hover {
+            background: var(--bg-quaternary);
+        }
+        
+        .command-editor-content {
+            height: calc(50vh - 80px);
+            overflow-y: auto;
+            padding: 24px;
+        }
+        
+        .command-editor-three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            height: 100%;
+        }
+        
+        .command-editor-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .command-editor-column-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-primary);
+            margin-bottom: 8px;
+        }
+        
+        .command-editor-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .command-editor-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .command-editor-input {
+            padding: 12px 16px;
+            border: 1px solid var(--border-secondary);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+        
+        .command-editor-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .command-editor-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .command-editor-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .command-editor-btn.primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .command-editor-btn.primary:hover {
+            background: #059669;
+        }
+        
+        .command-editor-btn.secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .command-editor-btn.secondary:hover {
+            background: #4b5563;
+        }
+        
+        [data-theme="dark"] .step-legend {
+            background: var(--bg-quaternary);
+            color: white;
+        }
+        
+        [data-theme="dark"] .legend-item {
+            color: white;
+        }
+
+        /* 编辑状态下保持白色背景 */
+        .script-line.editing {
+            background: #fff !important;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* 参数定义区样式 */
+        .parameter-definitions {
+            margin-bottom: 12px;
+        }
+        
+        .parameter-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            border: 1px solid var(--border-secondary);
+        }
+        
+        .parameter-row-field {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .parameter-row-field.description {
+            flex: 2;
+        }
+        
+        .parameter-row-field.options {
+            flex: 1;
+        }
+        
+        .parameter-row-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+        
+        .parameter-row-input {
+            padding: 10px 12px;
+            border: 1px solid var(--border-secondary);
+            border-radius: 4px;
+            font-size: 13px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+        
+        .parameter-row-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .parameter-row-remove {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 22px;
+            min-width: 32px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .parameter-row-remove:hover {
+            background: #dc2626;
+        }
+        
+        .add-parameter-btn {
+            width: 100%;
+            margin-top: 8px;
+        }
+        
+        /* 参数配置区样式 */
+        .param-dual-select {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .param-dual-select .param-input {
+            flex: 1;
+        }
+        
+        .examples-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-secondary);
+        }
+        
+        .example-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            border: 1px solid var(--border-secondary);
+        }
+        
+        .example-command {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--text-primary);
+            background: transparent;
+            padding: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部工具栏 -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <h1>LIGGGHTS 可视化界面</h1>
+                <button class="btn btn-primary">➕ 新建项目</button>
+                <button class="btn btn-gray">📁 打开</button>
+                <button class="btn btn-gray">💾 保存</button>
+                <button class="btn btn-primary" onclick="importCommands()">📦 导入命令</button>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-gray" id="languageToggle" onclick="toggleLanguage()">🌐 EN</button>
+                <button class="btn btn-gray" id="themeToggle" onclick="toggleTheme()">🌙 暗色</button>
+                <button class="btn btn-primary" onclick="importScript()">📥 导入脚本</button>
+                <button class="btn btn-green" onclick="exportScript()">⬇️ 导出脚本</button>
+                <button class="btn btn-green" id="runBtn">▶️ 运行</button>
+            </div>
+        </div>
+
+        <!-- 主要内容区 -->
+        <div class="main-content">
+            <!-- 左侧命令选择区 -->
+            <div class="commands-panel">
+                <!-- 搜索栏 -->
+                <div class="search-bar">
+                    <h2>命令定义</h2>
+                    <div class="search-wrapper">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                        </svg>
+                        <input type="text" id="searchInput" class="search-input" placeholder="搜索命令...">
+                        <button class="search-clear" id="searchClear" onclick="clearSearch()">×</button>
+                    </div>
+                </div>
+
+                <!-- 横向标签页 -->
+                <div class="tabs" id="tabs">
+                    <button class="tab active" data-category="初始化设置">
+                        <span class="tab-indicator color-blue"></span>
+                        初始化设置
+                        <span class="tab-count">0</span>
+                    </button>
+                    <button class="tab" data-category="几何定义">
+                        <span class="tab-indicator color-green"></span>
+                        几何定义
+                        <span class="tab-count">0</span>
+                    </button>
+                    <button class="tab" data-category="材料属性">
+                        <span class="tab-indicator color-purple"></span>
+                        材料属性
+                        <span class="tab-count">0</span>
+                    </button>
+                    <button class="tab" data-category="颗粒设置">
+                        <span class="tab-indicator color-orange"></span>
+                        颗粒设置
+                        <span class="tab-count">0</span>
+                    </button>
+                    <button class="tab" data-category="求解控制">
+                        <span class="tab-indicator color-red"></span>
+                        求解控制
+                        <span class="tab-count">0</span>
+                    </button>
+                    <button class="tab" data-category="输出控制">
+                        <span class="tab-indicator color-indigo"></span>
+                        输出控制
+                        <span class="tab-count">0</span>
+                    </button>
+                    <button class="tab" data-category="其它设置">
+                        <span class="tab-indicator color-gray"></span>
+                        其它设置
+                        <span class="tab-count">0</span>
+                    </button>
+                </div>
+
+                <!-- 命令网格 -->
+                <div class="commands-grid">
+                    <div class="commands-container" id="commandsContainer">
+                        <!-- 命令卡片将通过 JavaScript 动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中央参数配置区 -->
+            <div class="params-panel">
+                <div class="params-header">
+                    <h2>参数配置</h2>
+                </div>
+                <div class="params-content" id="paramsContent">
+                    <div class="empty-state">
+                        <div class="empty-icon">⚙️</div>
+                        <p>请从左侧选择一个命令开始配置</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧脚本预览 -->
+            <div class="script-panel">
+                <div class="script-header">
+                    <h2>脚本预览</h2>
+                    <div class="script-info">
+                        <button class="btn btn-primary" onclick="insertNewLine()" title="在末尾插入新行">➕ 插入</button>
+                        <button class="btn btn-red" onclick="undoLastChange()" id="undoBtn" disabled title="撤销上次操作">↶ 撤销</button>
+                        <button class="btn btn-gray" onclick="clearScript()" title="清空所有脚本">🗑️ 清空</button>
+                        <div style="width: 1px; height: 16px; background: var(--border-primary); margin: 0 4px;"></div>
+                        <span>📄</span>
+                        <span id="lineCount">0 行</span>
+                    </div>
+                </div>
+                <div class="script-content" id="scriptContent">
+                    <div class="empty-state">
+                        <div class="empty-icon">👁️</div>
+                        <p>脚本将在这里显示</p>
+                        <p style="font-size: 12px; margin-top: 8px; color: #9ca3af;">添加命令后即可预览</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 命令编辑器覆盖层 -->
+    <div class="command-editor-overlay" id="commandEditorOverlay">
+        <div class="command-editor-header">
+            <h3 class="command-editor-title" id="commandEditorTitle">新建命令</h3>
+            <div class="command-editor-actions-header">
+                <button class="command-editor-btn secondary" onclick="hideCommandEditor()">取消</button>
+                <button class="command-editor-btn primary" onclick="saveUserCommand()">保存</button>
+                <button class="command-editor-close" onclick="hideCommandEditor()">×</button>
+            </div>
+        </div>
+        <div class="command-editor-content">
+            <div class="command-editor-three-column">
+                <!-- 第一栏：命令名称和描述 -->
+                <div class="command-editor-column">
+                    <h4 class="command-editor-column-title">命令信息</h4>
+                    
+                    <div class="command-editor-field">
+                        <label class="command-editor-label">命令名称</label>
+                        <input type="text" class="command-editor-input" id="commandNameInput" placeholder="请输入命令名称" required>
+                    </div>
+                    
+                    <div class="command-editor-field">
+                        <label class="command-editor-label">命令描述</label>
+                        <textarea class="command-editor-input command-editor-textarea" id="commandDescInput" placeholder="请输入命令描述" rows="5"></textarea>
+                    </div>
+                </div>
+                
+                <!-- 第二栏：参数定义 -->
+                <div class="command-editor-column">
+                    <h4 class="command-editor-column-title">参数定义</h4>
+                    
+                    <div class="parameter-definitions" id="parameterDefinitions">
+                        <!-- 动态参数行将在这里插入 -->
+                    </div>
+                    <button type="button" class="command-editor-btn secondary" onclick="addParameterRow()" style="width: 100%;">➕ 添加参数</button>
+                </div>
+                
+                <!-- 第三栏：示例命令 -->
+                <div class="command-editor-column">
+                    <h4 class="command-editor-column-title">示例命令</h4>
+                    
+                    <div class="command-editor-field">
+                        <label class="command-editor-label">命令示例 (每行一个完整命令)</label>
+                        <textarea class="command-editor-input command-editor-textarea" id="commandExamplesInput" placeholder="请输入示例命令，每行一个&#10;例如：&#10;fix grav all gravity 9.81 vector 0 0 -1&#10;fix grav_x all gravity 5.0 vector 1 0 0" rows="8"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 语言支持
+        let currentLanguage = localStorage.getItem('language') || 'zh';
+        
+        const translations = {
+            zh: {
+                title: 'LIGGGHTS 可视化界面',
+                newProject: '➕ 新建项目',
+                open: '📁 打开',
+                save: '💾 保存',
+                importCommands: '📦 导入命令',
+                language: '🌐 EN',
+                theme: '🌙 暗色',
+                themeLight: '☀️ 亮色',
+                importScript: '📥 导入脚本',
+                exportScript: '⬇️ 导出脚本',
+                run: '▶️ 运行',
+                stop: '⏸️ 停止',
+                searchPlaceholder: '搜索命令...',
+                commandDefinition: '命令定义',
+                paramConfig: '参数配置',
+                scriptPreview: '脚本预览',
+                insert: '➕ 插入',
+                undo: '↶ 撤销',
+                clear: '🗑️ 清空',
+                lines: '行',
+                selectCommand: '请从左侧选择一个命令开始配置',
+                scriptEmpty: '脚本将在这里显示',
+                addAfterCommand: '添加命令后即可预览',
+                // 分类名称
+                initSettings: '初始化设置',
+                geometry: '几何定义',
+                materials: '材料属性',
+                particles: '颗粒设置',
+                solver: '求解控制',
+                output: '输出控制',
+                others: '其它设置',
+                // 步骤图例
+                init: '初始化',
+                geo: '几何',
+                mat: '材料',
+                part: '颗粒',
+                sol: '求解',
+                out: '输出',
+                other: '其它',
+                // 编辑器
+                newCommand: '新建命令',
+                editCommand: '编辑命令',
+                commandInfo: '命令信息',
+                commandName: '命令名称',
+                commandDesc: '命令描述',
+                paramDef: '参数定义',
+                exampleCommands: '示例命令',
+                addParam: '➕ 添加参数',
+                cancel: '取消',
+                saveCmd: '保存',
+                addToScript: '生成并添加到脚本',
+                // 提示信息
+                dragHint: '拖拽脚本行可调整执行顺序 • 双击可编辑内容 • 不同颜色表示不同步骤',
+                createProjectFirst: '请先创建或打开一个项目',
+                needProjectToSave: '需要项目才能保存自定义命令'
+            },
+            en: {
+                title: 'LIGGGHTS Visual Interface',
+                newProject: '➕ New Project',
+                open: '📁 Open',
+                save: '💾 Save',
+                importCommands: '📦 Import Commands',
+                language: '🌐 中文',
+                theme: '🌙 Dark',
+                themeLight: '☀️ Light',
+                importScript: '📥 Import Script',
+                exportScript: '⬇️ Export Script',
+                run: '▶️ Run',
+                stop: '⏸️ Stop',
+                searchPlaceholder: 'Search commands...',
+                commandDefinition: 'Command Definition',
+                paramConfig: 'Parameter Configuration',
+                scriptPreview: 'Script Preview',
+                insert: '➕ Insert',
+                undo: '↶ Undo',
+                clear: '🗑️ Clear',
+                lines: 'lines',
+                selectCommand: 'Please select a command from the left to start configuration',
+                scriptEmpty: 'Script will be displayed here',
+                addAfterCommand: 'Preview available after adding commands',
+                // 分类名称
+                initSettings: 'Initialization',
+                geometry: 'Geometry',
+                materials: 'Materials',
+                particles: 'Particles',
+                solver: 'Solver',
+                output: 'Output',
+                others: 'Others',
+                // 步骤图例
+                init: 'Init',
+                geo: 'Geom',
+                mat: 'Mater',
+                part: 'Parti',
+                sol: 'Solve',
+                out: 'Output',
+                other: 'Other',
+                // 编辑器
+                newCommand: 'New Command',
+                editCommand: 'Edit Command',
+                commandInfo: 'Command Information',
+                commandName: 'Command Name',
+                commandDesc: 'Command Description',
+                paramDef: 'Parameter Definition',
+                exampleCommands: 'Example Commands',
+                addParam: '➕ Add Parameter',
+                cancel: 'Cancel',
+                saveCmd: 'Save',
+                addToScript: 'Generate and Add to Script',
+                // 提示信息
+                dragHint: 'Drag script lines to reorder • Double-click to edit • Different colors represent different steps',
+                createProjectFirst: 'Please create or open a project first',
+                needProjectToSave: 'Project required to save custom commands'
+            }
+        };
+
+        // 获取当前语言的文本
+        function t(key) {
+            return translations[currentLanguage][key] || key;
+        }
+
+        // 切换语言
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+            localStorage.setItem('language', currentLanguage);
+            updateLanguage();
+        }
+
+        // 更新界面语言
+        function updateLanguage() {
+            // 更新页面标题
+            document.title = t('title');
+            
+            // 更新工具栏
+            document.querySelector('.toolbar h1').textContent = t('title');
+            document.querySelector('.btn-primary').innerHTML = t('newProject');
+            document.querySelectorAll('.btn-gray')[0].innerHTML = t('open');
+            document.querySelectorAll('.btn-gray')[1].innerHTML = t('save');
+            document.querySelector('[onclick="importCommands()"]').innerHTML = t('importCommands');
+            
+            // 更新语言按钮
+            document.getElementById('languageToggle').innerHTML = t('language');
+            updateThemeButton();
+            
+            document.querySelector('[onclick="importScript()"]').innerHTML = t('importScript');
+            document.querySelector('[onclick="exportScript()"]').innerHTML = t('exportScript');
+            updateRunButton();
+            
+            // 更新搜索框
+            document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+            
+            // 更新命令定义标题
+            document.querySelector('.search-bar h2').textContent = t('commandDefinition');
+            
+            // 更新标签页
+            updateTabs();
+            
+            // 更新参数配置区域
+            document.querySelector('.params-header h2').textContent = t('paramConfig');
+            
+            // 更新脚本预览区域
+            document.querySelector('.script-header h2').textContent = t('scriptPreview');
+            document.querySelector('[onclick="insertNewLine()"]').innerHTML = t('insert');
+            document.querySelector('[onclick="clearScript()"]').innerHTML = t('clear');
+            
+            // 更新空状态文本
+            updateEmptyStates();
+            
+            // 更新命令编辑器
+            updateCommandEditor();
+            
+            // 重新渲染命令和脚本
+            renderCommands();
+            renderParameterForm();
+            renderScript();
+        }
+
+        // 更新标签页
+        function updateTabs() {
+            const categories = [
+                { key: 'initSettings', dataCategory: '初始化设置' },
+                { key: 'geometry', dataCategory: '几何定义' },
+                { key: 'materials', dataCategory: '材料属性' },
+                { key: 'particles', dataCategory: '颗粒设置' },
+                { key: 'solver', dataCategory: '求解控制' },
+                { key: 'output', dataCategory: '输出控制' },
+                { key: 'others', dataCategory: '其它设置' }
+            ];
+            
+            const tabs = document.querySelectorAll('.tab');
+            categories.forEach((cat, index) => {
+                if (tabs[index]) {
+                    const currentCount = tabs[index].querySelector('.tab-count')?.textContent || '0';
+                    tabs[index].innerHTML = `<span class="tab-indicator ${tabs[index].querySelector('.tab-indicator').className.split(' ')[1]}"></span>${t(cat.key)}<span class="tab-count">${currentCount}</span>`;
+                }
+            });
+            
+            // 更新计数
+            updateTabCounts();
+        }
+        
+        // 更新标签计数
+        function updateTabCounts() {
+            const categories = ['初始化设置', '几何定义', '材料属性', '颗粒设置', '求解控制', '输出控制', '其它设置'];
+            const tabs = document.querySelectorAll('.tab');
+            
+            categories.forEach((category, index) => {
+                const commandCount = userCommands[category] ? Object.keys(userCommands[category]).length : 0;
+                const countElement = tabs[index]?.querySelector('.tab-count');
+                if (countElement) {
+                    countElement.textContent = commandCount;
+                }
+            });
+        }
+
+        // 更新运行按钮
+        function updateRunButton() {
+            const runBtn = document.getElementById('runBtn');
+            if (runBtn.textContent.includes('运行') || runBtn.textContent.includes('Run')) {
+                runBtn.innerHTML = t('run');
+            } else {
+                runBtn.innerHTML = t('stop');
+            }
+        }
+
+        // 更新空状态
+        function updateEmptyStates() {
+            // 这个函数将在渲染函数中使用，确保空状态文本使用正确的语言
+        }
+
+        // 更新命令编辑器文本
+        function updateCommandEditor() {
+            // 更新编辑器静态文本
+            const cancelBtns = document.querySelectorAll('.command-editor-btn.secondary');
+            const saveBtns = document.querySelectorAll('.command-editor-btn.primary');
+            
+            cancelBtns.forEach(btn => {
+                if (btn.textContent.includes('取消') || btn.textContent.includes('Cancel')) {
+                    btn.textContent = t('cancel');
+                }
+                if (btn.textContent.includes('添加参数') || btn.textContent.includes('Add Parameter')) {
+                    btn.innerHTML = t('addParam');
+                }
+            });
+            
+            saveBtns.forEach(btn => {
+                if (btn.textContent.includes('保存') || btn.textContent.includes('Save')) {
+                    btn.textContent = t('saveCmd');
+                }
+            });
+
+            // 更新列标题
+            const columnTitles = document.querySelectorAll('.command-editor-column-title');
+            if (columnTitles[0]) columnTitles[0].textContent = t('commandInfo');
+            if (columnTitles[1]) columnTitles[1].textContent = t('paramDef');
+            if (columnTitles[2]) columnTitles[2].textContent = t('exampleCommands');
+
+            // 更新输入框标签
+            const labels = document.querySelectorAll('.command-editor-label');
+            if (labels[0]) labels[0].textContent = t('commandName');
+            if (labels[1]) labels[1].textContent = t('commandDesc');
+            if (labels[2]) labels[2].textContent = currentLanguage === 'zh' ? '命令示例 (每行一个完整命令)' : 'Command Examples (one per line)';
+
+            // 更新placeholders
+            const nameInput = document.getElementById('commandNameInput');
+            const descInput = document.getElementById('commandDescInput');
+            const examplesInput = document.getElementById('commandExamplesInput');
+            
+            if (nameInput) nameInput.placeholder = currentLanguage === 'zh' ? '请输入命令名称' : 'Enter command name';
+            if (descInput) descInput.placeholder = currentLanguage === 'zh' ? '请输入命令描述' : 'Enter command description';
+            if (examplesInput) {
+                examplesInput.placeholder = currentLanguage === 'zh' ? 
+                    '请输入示例命令，每行一个\n例如：\nfix grav all gravity 9.81 vector 0 0 -1\nfix grav_x all gravity 5.0 vector 1 0 0' :
+                    'Enter example commands, one per line\nFor example:\nfix grav all gravity 9.81 vector 0 0 -1\nfix grav_x all gravity 5.0 vector 1 0 0';
+            }
+        }
+
+        // 主题切换功能
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        
+        // 初始化主题
+        function initTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            updateThemeButton();
+        }
+        
+        // 切换主题
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeButton();
+        }
+        
+        // 更新主题按钮文本
+        function updateThemeButton() {
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                if (currentTheme === 'dark') {
+                    themeToggle.innerHTML = t('themeLight');
+                } else {
+                    themeToggle.innerHTML = t('theme');
+                }
+            }
+        }
+        
+        // 页面加载时初始化主题和语言
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            updateLanguage();
+        });
+
+        // 命令数据
+        const commandCategories = {
+            '初始化设置': [
+                { name: 'dimension', desc: '设置维度', params: ['dimension'] },
+                { name: 'units', desc: '设置单位系统', params: ['units'] },
+                { name: 'atom_style', desc: '原子类型', params: ['style'] },
+                { name: 'boundary', desc: '边界条件', params: ['x', 'y', 'z'] },
+                { name: 'newton', desc: '牛顿第三定律', params: ['on/off'] }
+            ],
+            '几何定义': [
+                { name: 'region', desc: '定义区域', params: ['ID', 'type', 'args'] },
+                { name: 'create_box', desc: '创建模拟盒子', params: ['N', 'region-ID'] },
+                { name: 'create_atoms', desc: '创建原子', params: ['type', 'style', 'args'] },
+                { name: 'lattice', desc: '晶格设置', params: ['style', 'scale'] }
+            ],
+            '材料属性': [
+                { name: 'pair_style', desc: '对势函数', params: ['style', 'args'] },
+                { name: 'pair_coeff', desc: '对势系数', params: ['I', 'J', 'args'] },
+                { name: 'fix wall/gran', desc: '壁面设置', params: ['ID', 'group', 'style'] }
+            ],
+            '颗粒设置': [
+                { name: 'fix insert', desc: '颗粒插入', params: ['ID', 'group', 'style'] },
+                { name: 'fix gravity', desc: '重力设置', params: ['ID', 'group', 'gravity'] },
+                { name: 'fix nve/sphere', desc: '球形颗粒积分', params: ['ID', 'group'] }
+            ],
+            '求解控制': [
+                { name: 'timestep', desc: '时间步长', params: ['dt'] },
+                { name: 'run', desc: '运行步数', params: ['N'] },
+                { name: 'minimize', desc: '能量最小化', params: ['etol', 'ftol', 'maxiter', 'maxeval'] },
+                { name: 'reset_timestep', desc: '重置时间步', params: ['N'] }
+            ],
+            '输出控制': [
+                { name: 'dump', desc: '输出dump文件', params: ['ID', 'group', 'style', 'N', 'file'] },
+                { name: 'thermo', desc: '热力学输出', params: ['N'] },
+                { name: 'thermo_style', desc: '输出格式', params: ['style', 'args'] }
+            ]
+        };
+
+        // 参数模板
+        const parameterTemplates = {
+            'dimension': { dimension: { type: 'select', options: ['2', '3'], default: '3' } },
+            'units': { units: { type: 'select', options: ['lj', 'real', 'metal', 'si', 'cgs'], default: 'si' } },
+            'atom_style': { style: { type: 'select', options: ['atomic', 'sphere', 'granular'], default: 'granular' } },
+            'timestep': { dt: { type: 'number', default: '0.00001', step: '0.00001' } },
+            'run': { N: { type: 'number', default: '10000', step: '1000' } }
+        };
+
+        // 全局状态
+        let activeCategory = '初始化设置';
+        let selectedCommand = null;
+        let scriptLines = [];
+        let parameters = {};
+        let currentProject = null; // 当前项目信息
+        let projectName = ''; // 项目名称
+        let currentFileHandle = null; // 当前文件句柄
+        let previousScriptState = null; // 上一次脚本状态（用于撤销）
+        let commandPositions = {}; // 每个分类的命令位置（网格坐标）
+        let userCommands = {}; // 用户自定义命令库
+        // 命令编辑器状态
+        let currentEditingCommandId = null;
+        let currentEditingPosition = null;
+        
+        // 显示添加命令编辑器
+        function showAddCommandEditor(row, col) {
+            // 检查是否有活动项目
+            if (!currentProject || !projectName) {
+                const userChoice = confirm('需要先创建项目才能保存自定义命令。\n\n点击"确定"创建新项目，点击"取消"返回。');
+                if (userChoice) {
+                    newProject();
+                }
+                return;
+            }
+            
+            currentEditingCommandId = null;
+            currentEditingPosition = { row, col };
+            
+            document.getElementById('commandEditorTitle').textContent = t('newCommand');
+            document.getElementById('commandNameInput').value = '';
+            document.getElementById('commandDescInput').value = '';
+            document.getElementById('commandExamplesInput').value = '';
+            
+            // 清空参数行
+            clearParameterRows();
+            
+            showCommandEditor();
+        }
+        
+        // 显示编辑命令编辑器
+        function editUserCommand(commandId) {
+            // 检查是否有活动项目
+            if (!currentProject || !projectName) {
+                alert('需要先创建或打开一个项目才能编辑命令。');
+                return;
+            }
+            
+            const userCategoryCommands = userCommands[activeCategory] || {};
+            const command = userCategoryCommands[commandId];
+            
+            if (!command) return;
+            
+            currentEditingCommandId = commandId;
+            currentEditingPosition = commandPositions[activeCategory][commandId];
+            
+            document.getElementById('commandEditorTitle').textContent = t('editCommand');
+            document.getElementById('commandNameInput').value = command.name;
+            document.getElementById('commandDescInput').value = command.desc || '';
+            document.getElementById('commandExamplesInput').value = (command.examples || []).join('\n');
+            
+            // 加载参数行数据
+            loadParameterRows(command.parameterRows || []);
+            
+            showCommandEditor();
+        }
+        
+        // 显示命令编辑器
+        function showCommandEditor() {
+            const overlay = document.getElementById('commandEditorOverlay');
+            overlay.classList.add('show');
+            
+            // 聚焦到命令名称输入框
+            setTimeout(() => {
+                document.getElementById('commandNameInput').focus();
+            }, 300);
+        }
+        
+        // 隐藏命令编辑器
+        function hideCommandEditor() {
+            const overlay = document.getElementById('commandEditorOverlay');
+            overlay.classList.remove('show');
+            
+            currentEditingCommandId = null;
+            currentEditingPosition = null;
+        }
+        
+        // 删除用户命令
+        function deleteUserCommand(commandId) {
+            // 检查是否有活动项目
+            if (!currentProject || !projectName) {
+                alert('需要先创建或打开一个项目才能删除命令。');
+                return;
+            }
+            
+            const userCategoryCommands = userCommands[activeCategory] || {};
+            const command = userCategoryCommands[commandId];
+            
+            if (!command) return;
+            
+            if (confirm(`确定要删除命令 "${command.name}" 吗？`)) {
+                // 从用户命令库中删除
+                delete userCategoryCommands[commandId];
+                
+                // 从位置信息中删除
+                if (commandPositions[activeCategory]) {
+                    delete commandPositions[activeCategory][commandId];
+                }
+                
+                // 如果当前选中的是这个命令，清除选中状态
+                if (selectedCommand && selectedCommand.id === commandId) {
+                    selectedCommand = null;
+                    parameters = {};
+                }
+                
+                // 重新渲染
+                renderCommands();
+                renderParameterForm();
+                
+                // 更新项目状态
+                updateProjectUserCommands();
+                
+                // 更新标签计数
+                updateTabCounts();
+            }
+        }
+        
+        // 设置命令编辑器表单事件
+        function setupCommandEditorForm() {
+            // ESC 键关闭编辑器
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const overlay = document.getElementById('commandEditorOverlay');
+                    if (overlay && overlay.classList.contains('show')) {
+                        hideCommandEditor();
+                    }
+                }
+            });
+        }
+        
+        // 参数行管理函数
+        let parameterRowCounter = 0;
+        
+        // 添加参数行
+        function addParameterRow() {
+            const container = document.getElementById('parameterDefinitions');
+            const rowId = `paramRow_${parameterRowCounter++}`;
+            
+            const rowHTML = `
+                <div class="parameter-row" id="${rowId}">
+                    <div class="parameter-row-field description">
+                        <label class="parameter-row-label">参数描述</label>
+                        <input type="text" class="parameter-row-input" placeholder="如：重力方向" data-field="description">
+                    </div>
+                    <div class="parameter-row-field options">
+                        <label class="parameter-row-label">参数框1</label>
+                        <input type="text" class="parameter-row-input" placeholder="如：x,y,z" data-field="options1">
+                    </div>
+                    <div class="parameter-row-field options">
+                        <label class="parameter-row-label">参数框2</label>
+                        <input type="text" class="parameter-row-input" placeholder="如：vector,chute" data-field="options2">
+                    </div>
+                    <button type="button" class="parameter-row-remove" onclick="removeParameterRow('${rowId}')">×</button>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', rowHTML);
+        }
+        
+        // 删除参数行
+        function removeParameterRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+            }
+        }
+        
+        // 获取所有参数行数据
+        function getParameterRowsData() {
+            const rows = document.querySelectorAll('.parameter-row');
+            const parameterRows = [];
+            
+            rows.forEach(row => {
+                const description = row.querySelector('[data-field="description"]').value.trim();
+                const options1Text = row.querySelector('[data-field="options1"]').value.trim();
+                const options2Text = row.querySelector('[data-field="options2"]').value.trim();
+                
+                // 只要有任何一个字段有内容，就保存这一行（不再要求描述必填）
+                if (description || options1Text || options2Text) {
+                    parameterRows.push({
+                        description: description || '参数', // 如果描述为空，使用默认描述
+                        options1: parseOptionsText(options1Text),
+                        options2: parseOptionsText(options2Text)
+                    });
+                }
+            });
+            
+            return parameterRows;
+        }
+        
+        // 解析选项文本，支持逗号、中文逗号、or分隔
+        function parseOptionsText(text) {
+            if (!text) return [];
+            
+            // 支持逗号、中文逗号、or（不区分大小写）分隔
+            return text.split(/[,，]|\s+or\s+/i)
+                       .map(option => option.trim())
+                       .filter(option => option);
+        }
+        
+        // 清空参数行
+        function clearParameterRows() {
+            const container = document.getElementById('parameterDefinitions');
+            container.innerHTML = '';
+            parameterRowCounter = 0;
+        }
+        
+        // 加载参数行数据
+        function loadParameterRows(parameterRows) {
+            clearParameterRows();
+            
+            if (parameterRows && parameterRows.length > 0) {
+                parameterRows.forEach(rowData => {
+                    addParameterRow();
+                    
+                    // 填充最后一行的数据
+                    const lastRow = document.querySelector('.parameter-row:last-child');
+                    if (lastRow) {
+                        lastRow.querySelector('[data-field="description"]').value = rowData.description || '';
+                        lastRow.querySelector('[data-field="options1"]').value = (rowData.options1 || []).join(', ');
+                        lastRow.querySelector('[data-field="options2"]').value = (rowData.options2 || []).join(', ');
+                    }
+                });
+            }
+        }
+        
+        // 保存用户命令
+        function saveUserCommand() {
+            // 再次检查项目状态（防止编辑过程中项目状态改变）
+            if (!currentProject || !projectName) {
+                alert('保存失败：需要先创建项目才能保存命令！');
+                hideCommandEditor();
+                return;
+            }
+            
+            const name = document.getElementById('commandNameInput').value.trim();
+            const desc = document.getElementById('commandDescInput').value.trim();
+            const examples = document.getElementById('commandExamplesInput').value.trim();
+            
+            if (!name) {
+                alert('请输入命令名称！');
+                return;
+            }
+            
+            // 获取参数行数据
+            const parameterRows = getParameterRowsData();
+            
+            // 解析示例命令
+            const exampleLines = examples ? examples.split('\n').map(line => line.trim()).filter(line => line) : [];
+            
+            // 创建或更新命令
+            const commandId = currentEditingCommandId || generateCommandId();
+            const position = currentEditingPosition;
+            
+            // 初始化分类
+            if (!userCommands[activeCategory]) {
+                userCommands[activeCategory] = {};
+            }
+            
+            if (!commandPositions[activeCategory]) {
+                commandPositions[activeCategory] = {};
+            }
+            
+            // 保存命令（新数据结构）
+            userCommands[activeCategory][commandId] = {
+                id: commandId,
+                name: name,
+                desc: desc || '用户自定义命令',
+                parameterRows: parameterRows,
+                examples: exampleLines
+            };
+            
+            // 保存位置
+            commandPositions[activeCategory][commandId] = position;
+            
+            // 隐藏编辑器
+            hideCommandEditor();
+            
+            // 重新渲染
+            renderCommands();
+            
+            // 更新项目状态
+            updateProjectUserCommands();
+            
+            // 更新标签计数
+            updateTabCounts();
+            
+            // 显示成功消息
+            const action = currentEditingCommandId ? '更新' : '创建';
+            alert(`命令 "${name}" ${action}成功！\n\n项目：${projectName}`);
+        }
+        
+        // 生成命令ID
+        function generateCommandId() {
+            return 'user_cmd_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // 获取命令参数显示文本（兼容新旧格式）
+        function getCommandParamsDisplay(command) {
+            if (command.parameterRows && command.parameterRows.length > 0) {
+                // 新格式：参数行
+                const paramCount = command.parameterRows.length;
+                const exampleCount = (command.examples || []).length;
+                return `参数行: ${paramCount} | 示例: ${exampleCount}`;
+            } else if (command.params && command.params.length > 0) {
+                // 旧格式：参数列表
+                return `参数: ${command.params.join(', ')}`;
+            } else {
+                return '参数: 无';
+            }
+        }
+        
+        // 数据格式兼容性处理
+        function migrateCommandToNewFormat(command) {
+            // 如果已经是新格式，直接返回
+            if (command.parameterRows) {
+                return command;
+            }
+            
+            // 如果是旧格式，转换为新格式
+            const migratedCommand = {
+                id: command.id,
+                name: command.name,
+                desc: command.desc,
+                parameterRows: [],
+                examples: []
+            };
+            
+            // 如果有旧的模板，添加为示例
+            if (command.template) {
+                migratedCommand.examples.push(command.template);
+            }
+            
+            // 如果有旧的参数，尝试转换（这是一个简单的映射）
+            if (command.params && command.params.length > 0) {
+                // 为每个旧参数创建一个参数行
+                command.params.forEach(param => {
+                    migratedCommand.parameterRows.push({
+                        description: `参数: ${param}`,
+                        options1: [param],
+                        options2: []
+                    });
+                });
+            }
+            
+            return migratedCommand;
+        }
+        
+        // 确保所有用户命令都使用新格式
+        function ensureCommandsNewFormat() {
+            Object.keys(userCommands).forEach(category => {
+                const categoryCommands = userCommands[category];
+                Object.keys(categoryCommands).forEach(commandId => {
+                    categoryCommands[commandId] = migrateCommandToNewFormat(categoryCommands[commandId]);
+                });
+            });
+        }
+        
+        // 更新界面状态（基于项目状态）
+        function updateInterfaceState() {
+            const hasProject = currentProject && projectName;
+            
+            // 工具栏按钮状态
+            const saveBtn = document.querySelector('.toolbar-left .btn-gray:nth-child(4)');
+            const importCommandsBtn = document.querySelector('.btn-primary[onclick="importCommands()"]');
+            const importScriptBtn = document.querySelector('.btn-primary[onclick="importScript()"]');
+            const exportBtn = document.querySelector('.btn-green[onclick="exportScript()"]');
+            const runBtn = document.getElementById('runBtn');
+            
+            // 脚本区按钮状态（撤销按钮需要特殊处理）
+            const insertBtn = document.querySelector('.btn-primary[onclick="insertNewLine()"]');
+            const undoBtn = document.getElementById('undoBtn');
+            const clearBtn = document.querySelector('.btn-gray[onclick="clearScript()"]');
+            
+            // 命令网格容器
+            const commandsContainer = document.getElementById('commandsContainer');
+            const searchInput = document.getElementById('searchInput');
+            const tabs = document.getElementById('tabs');
+            
+            if (hasProject) {
+                // 有项目时：启用所有功能（除了撤销按钮）
+                [saveBtn, importCommandsBtn, importScriptBtn, exportBtn, runBtn, insertBtn, clearBtn].forEach(btn => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                        btn.style.pointerEvents = 'auto';
+                    }
+                });
+                
+                // 撤销按钮特殊处理：先启用样式，然后由 updateUndoButton 决定实际状态
+                if (undoBtn) {
+                    undoBtn.style.pointerEvents = 'auto';
+                    undoBtn.style.cursor = 'pointer';
+                    // 不在这里设置 disabled 和 opacity，由 updateUndoButton 决定
+                }
+                
+                // 启用搜索和标签
+                if (searchInput) {
+                    searchInput.disabled = false;
+                    searchInput.style.opacity = '1';
+                    searchInput.style.cursor = 'text';
+                }
+                
+                // 确保搜索图标可见
+                const searchIcon = document.querySelector('.search-icon');
+                if (searchIcon) {
+                    searchIcon.style.opacity = '1';
+                }
+                
+                if (tabs) {
+                    tabs.style.pointerEvents = 'auto';
+                    tabs.style.opacity = '1';
+                }
+                
+                if (commandsContainer) {
+                    commandsContainer.style.pointerEvents = 'auto';
+                    commandsContainer.style.opacity = '1';
+                }
+                
+                // 撤销按钮由它自己的逻辑决定状态
+                updateUndoButton();
+                
+            } else {
+                // 无项目时：禁用大部分功能
+                [saveBtn, importCommandsBtn, importScriptBtn, exportBtn, runBtn, insertBtn, undoBtn, clearBtn].forEach(btn => {
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.4';
+                        btn.style.cursor = 'not-allowed';
+                        btn.style.pointerEvents = 'none';
+                    }
+                });
+                
+                // 禁用搜索和标签
+                if (searchInput) {
+                    searchInput.disabled = true;
+                    searchInput.style.opacity = '0.4';
+                    searchInput.style.cursor = 'not-allowed';
+                    searchInput.value = ''; // 清空搜索
+                }
+                
+                // 搜索图标也需要相应的透明度处理
+                const searchIcon = document.querySelector('.search-icon');
+                if (searchIcon) {
+                    searchIcon.style.opacity = '0.4';
+                }
+                
+                if (tabs) {
+                    tabs.style.pointerEvents = 'none';
+                    tabs.style.opacity = '0.4';
+                }
+                
+                if (commandsContainer) {
+                    commandsContainer.style.pointerEvents = 'none';
+                    commandsContainer.style.opacity = '0.4';
+                }
+            }
+        }
+        
+        // 检查项目状态的通用函数
+        function checkProjectRequired(actionName = '此操作') {
+            if (!currentProject || !projectName) {
+                alert(`${actionName}需要先创建或打开一个项目。`);
+                return false;
+            }
+            return true;
+        }
+        
+        // 更新项目中的用户命令
+        function updateProjectUserCommands() {
+            if (currentProject) {
+                currentProject.userCommands = {...userCommands};
+                currentProject.commandPositions = {...commandPositions};
+                currentProject.timestamp = new Date().toISOString();
+            }
+        }
+
+        // 命令步骤映射
+        const commandStepMapping = {
+            // 初始化设置
+            'dimension': '初始化设置',
+            'units': '初始化设置',
+            'atom_style': '初始化设置',
+            'boundary': '初始化设置',
+            'newton': '初始化设置',
+            
+            // 几何定义
+            'region': '几何定义',
+            'create_box': '几何定义',
+            'create_atoms': '几何定义',
+            'lattice': '几何定义',
+            
+            // 材料属性
+            'pair_style': '材料属性',
+            'pair_coeff': '材料属性',
+            'fix wall/gran': '材料属性',
+            
+            // 颗粒设置
+            'fix insert': '颗粒设置',
+            'fix gravity': '颗粒设置',
+            'fix nve/sphere': '颗粒设置',
+            
+            // 求解控制
+            'timestep': '求解控制',
+            'run': '求解控制',
+            'minimize': '求解控制',
+            'reset_timestep': '求解控制',
+            
+            // 输出控制
+            'dump': '输出控制',
+            'thermo': '输出控制',
+            'thermo_style': '输出控制'
+        };
+
+        // 步骤到CSS类的映射
+        const stepToClassMapping = {
+            '初始化设置': 'step-init',
+            '几何定义': 'step-geometry',
+            '材料属性': 'step-material',
+            '颗粒设置': 'step-particle',
+            '求解控制': 'step-solver',
+            '输出控制': 'step-output',
+            '其它设置': 'step-other'
+        };
+
+        // 保存当前脚本状态（用于撤销）
+        function saveScriptState() {
+            previousScriptState = [...scriptLines];
+            updateUndoButton();
+        }
+
+        // 更新撤销按钮状态
+        function updateUndoButton() {
+            const undoBtn = document.getElementById('undoBtn');
+            if (undoBtn) {
+                const canUndo = previousScriptState !== null && previousScriptState.length !== scriptLines.length || 
+                               (previousScriptState !== null && JSON.stringify(previousScriptState) !== JSON.stringify(scriptLines));
+                undoBtn.disabled = !canUndo;
+                undoBtn.style.opacity = canUndo ? '1' : '0.5';
+            }
+        }
+
+        // 撤销上次更改
+        function undoLastChange() {
+            if (!checkProjectRequired('撤销操作')) return;
+            if (previousScriptState !== null) {
+                const currentState = [...scriptLines];
+                scriptLines = [...previousScriptState];
+                previousScriptState = null; // 只能撤销一次
+                
+                renderScript();
+                
+                // 更新项目状态
+                if (currentProject) {
+                    currentProject.scriptLines = [...scriptLines];
+                    currentProject.timestamp = new Date().toISOString();
+                }
+                
+                updateUndoButton();
+                
+                // 显示撤销提示
+                const linesDiff = currentState.length - scriptLines.length;
+                if (linesDiff > 0) {
+                    console.log(`已撤销：删除了 ${linesDiff} 行脚本`);
+                } else if (linesDiff < 0) {
+                    console.log(`已撤销：添加了 ${Math.abs(linesDiff)} 行脚本`);
+                } else {
+                    console.log('已撤销：恢复到上一次状态');
+                }
+            }
+        }
+
+        // 获取命令的步骤
+        function getCommandStep(commandLine) {
+            if (!commandLine || typeof commandLine !== 'string') {
+                return '初始化设置'; // 默认步骤
+            }
+            
+            const command = commandLine.trim().split(' ')[0];
+            
+            // 检查完整命令名
+            if (commandStepMapping[commandLine.trim()]) {
+                return commandStepMapping[commandLine.trim()];
+            }
+            
+            // 检查命令的第一个词
+            if (commandStepMapping[command]) {
+                return commandStepMapping[command];
+            }
+            
+            // 检查复合命令（如 "fix insert"）
+            const firstTwoWords = commandLine.trim().split(' ').slice(0, 2).join(' ');
+            if (commandStepMapping[firstTwoWords]) {
+                return commandStepMapping[firstTwoWords];
+            }
+            
+            // 特殊处理fix命令
+            if (command === 'fix') {
+                const fixType = commandLine.trim().split(' ')[2];
+                if (fixType) {
+                    if (fixType.includes('wall') || fixType.includes('gran')) {
+                        return '材料属性';
+                    } else if (fixType.includes('insert')) {
+                        return '颗粒设置';
+                    } else if (fixType.includes('gravity') || fixType.includes('nve')) {
+                        return '颗粒设置';
+                    }
+                }
+            }
+            
+            return '初始化设置'; // 默认步骤
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCommands();
+            setupEventListeners();
+            setupCommandEditorForm();
+            updateInterfaceState(); // 初始化界面状态
+            updateTabCounts(); // 初始化标签计数
+        });
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 标签切换
+            document.getElementById('tabs').addEventListener('click', function(e) {
+                if (e.target.classList.contains('tab')) {
+                    switchTab(e.target.dataset.category);
+                }
+            });
+
+            // 搜索
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                const searchTerm = e.target.value;
+                updateSearchClearButton(searchTerm);
+                performCrossTabSearch(searchTerm);
+            });
+
+            // 运行按钮
+            document.getElementById('runBtn').addEventListener('click', function() {
+                this.classList.toggle('btn-red');
+                this.classList.toggle('btn-green');
+                if (this.textContent.includes('运行')) {
+                    this.innerHTML = '⏸️ 停止';
+                } else {
+                    this.innerHTML = '▶️ 运行';
+                }
+            });
+
+            // 项目管理按钮
+            setupProjectButtons();
+        }
+
+        // 设置项目管理按钮事件
+        function setupProjectButtons() {
+            // 新建项目按钮
+            document.querySelector('.toolbar-left .btn-primary').addEventListener('click', newProject);
+            
+            // 打开项目按钮
+            document.querySelector('.toolbar-left .btn-gray:nth-child(3)').addEventListener('click', openProject);
+            
+            // 保存项目按钮
+            document.querySelector('.toolbar-left .btn-gray:nth-child(4)').addEventListener('click', saveProject);
+        }
+
+        // 切换标签
+        function switchTab(category) {
+            activeCategory = category;
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.category === category);
+            });
+            renderCommands();
+        }
+
+        // 更新搜索清除按钮显示状态
+        function updateSearchClearButton(searchTerm) {
+            const clearBtn = document.getElementById('searchClear');
+            if (searchTerm.trim()) {
+                clearBtn.classList.add('show');
+            } else {
+                clearBtn.classList.remove('show');
+            }
+        }
+
+        // 清除搜索
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            updateSearchClearButton('');
+            clearSearchHighlights();
+            renderCommands();
+        }
+
+        // 跨标签搜索
+        function performCrossTabSearch(searchTerm) {
+            clearSearchHighlights();
+            
+            if (!searchTerm.trim()) {
+                renderCommands();
+                return;
+            }
+
+            const matchingCategories = [];
+            const allCategories = ['初始化设置', '几何定义', '材料属性', '颗粒设置', '求解控制', '输出控制', '其它设置'];
+            
+            // 搜索所有分类中的命令
+            allCategories.forEach(category => {
+                const categoryCommands = userCommands[category] || {};
+                const hasMatches = Object.values(categoryCommands).some(cmd => 
+                    cmd.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    cmd.desc.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                
+                if (hasMatches) {
+                    matchingCategories.push(category);
+                }
+            });
+
+            if (matchingCategories.length > 0) {
+                // 高亮匹配的标签
+                highlightSearchTabs(matchingCategories);
+                
+                // 如果当前标签没有匹配结果，切换到第一个有结果的标签
+                if (!matchingCategories.includes(activeCategory)) {
+                    switchTab(matchingCategories[0]);
+                } else {
+                    renderCommands(searchTerm);
+                }
+            } else {
+                renderCommands(searchTerm);
+            }
+        }
+
+        // 高亮搜索匹配的标签
+        function highlightSearchTabs(matchingCategories) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                const category = tab.dataset.category;
+                if (matchingCategories.includes(category)) {
+                    tab.classList.add('search-highlight');
+                } else {
+                    tab.classList.remove('search-highlight');
+                }
+            });
+        }
+
+        // 清除搜索高亮
+        function clearSearchHighlights() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('search-highlight');
+            });
+            document.querySelectorAll('.command-card').forEach(card => {
+                card.classList.remove('search-highlight');
+            });
+        }
+
+        // 渲染命令网格工作台
+        function renderCommands(searchTerm = '') {
+            const container = document.getElementById('commandsContainer');
+            
+            // 检查是否有项目
+            if (!currentProject || !projectName) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1; grid-row: 1 / -1; opacity: 1 !important; margin-top: 430px;">
+                        <div class="empty-icon" style="opacity: 1 !important;">📁</div>
+                        <p style="opacity: 1 !important; color: #9ca3af !important;">${t('createProjectFirst')}</p>
+                        <p style="font-size: 12px; margin-top: 8px; color: #9ca3af; opacity: 1 !important;">${t('needProjectToSave')}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 获取用户命令（如果为空则显示初始状态）
+            const userCategoryCommands = userCommands[activeCategory] || {};
+            const commands = Object.values(userCategoryCommands);
+            
+            // 过滤命令
+            const filteredCommands = searchTerm ? commands.filter(cmd => 
+                cmd.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                cmd.desc.toLowerCase().includes(searchTerm.toLowerCase())
+            ) : commands;
+
+            if (filteredCommands.length === 0 && searchTerm) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1; grid-row: 1 / -1;">
+                        <div class="empty-icon">🔍</div>
+                        <p>未找到匹配的命令</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 动态计算网格大小
+            const containerWidth = container.clientWidth;
+            const cellMinWidth = 280;
+            const actualCols = Math.max(2, Math.floor((containerWidth - 32) / (cellMinWidth + 12)));
+            const minRows = 3; // 最少显示3行
+            const neededRows = Math.ceil((commands.length + 1) / actualCols); // +1 for add button
+            const actualRows = Math.max(minRows, neededRows);
+            
+            // 更新CSS网格
+            container.style.gridTemplateColumns = `repeat(${actualCols}, 1fr)`;
+            container.style.gridTemplateRows = `repeat(${actualRows}, 120px)`;
+            
+            // 初始化位置信息
+            if (!commandPositions[activeCategory]) {
+                commandPositions[activeCategory] = {};
+            }
+            
+            // 清理无效位置（超出网格范围的）
+            const positions = commandPositions[activeCategory];
+            Object.keys(positions).forEach(cmdId => {
+                const pos = positions[cmdId];
+                if (pos.row >= actualRows || pos.col >= actualCols) {
+                    // 重新分配位置
+                    const availablePos = findFirstAvailablePosition(actualRows, actualCols, positions, commands);
+                    if (availablePos) {
+                        positions[cmdId] = availablePos;
+                    }
+                }
+            });
+            
+            // 为新命令分配位置（如果没有位置信息）
+            commands.forEach(cmd => {
+                if (!positions[cmd.id]) {
+                    const availablePos = findFirstAvailablePosition(actualRows, actualCols, positions, commands);
+                    if (availablePos) {
+                        positions[cmd.id] = availablePos;
+                    }
+                }
+            });
+            
+            // 找到第一个空白位置用于放置添加按钮
+            const addButtonPosition = findFirstAvailablePosition(actualRows, actualCols, positions, commands);
+            
+            let gridHTML = '';
+            
+            // 生成所有网格单元格
+            for (let row = 0; row < actualRows; row++) {
+                for (let col = 0; col < actualCols; col++) {
+                    const command = findUserCommandAtPosition(row, col, filteredCommands);
+                    
+                    if (command) {
+                        // 有用户命令的单元格
+                        gridHTML += `
+                            <div class="grid-cell occupied" 
+                                 data-row="${row}" 
+                                 data-col="${col}"
+                                 ondrop="handleGridDrop(event, ${row}, ${col})"
+                                 ondragover="handleGridDragOver(event)">
+                                <div class="command-card" 
+                                     draggable="true" 
+                                     data-command-id="${command.id}"
+                                     onclick="selectUserCommand('${command.id}')"
+                                     ondragstart="handleCommandDragStart(event)">
+                                    <div class="command-actions">
+                                        <button class="command-action-btn edit" onclick="editUserCommand('${command.id}'); event.stopPropagation();">✏</button>
+                                        <button class="command-action-btn delete" onclick="deleteUserCommand('${command.id}'); event.stopPropagation();">✕</button>
+                                    </div>
+                                    <div class="command-name">${command.name}</div>
+                                    <div class="command-desc">${command.desc}</div>
+                                    <div class="command-params">${getCommandParamsDisplay(command)}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (!searchTerm && addButtonPosition && row === addButtonPosition.row && col === addButtonPosition.col) {
+                        // 添加命令按钮（只在非搜索状态下显示）
+                        gridHTML += `
+                            <div class="grid-cell add-command" 
+                                 data-row="${row}" 
+                                 data-col="${col}"
+                                 onclick="showAddCommandEditor(${row}, ${col})">
+                                <div class="add-command-icon">➕</div>
+                            </div>
+                        `;
+                    } else {
+                        // 空白单元格
+                        gridHTML += `
+                            <div class="grid-cell" 
+                                 data-row="${row}" 
+                                 data-col="${col}"
+                                 ondrop="handleGridDrop(event, ${row}, ${col})"
+                                 ondragover="handleGridDragOver(event)">
+                            </div>
+                        `;
+                    }
+                }
+            }
+            
+            container.innerHTML = gridHTML;
+        }
+        
+        // 找到第一个可用位置
+        function findFirstAvailablePosition(maxRows, maxCols, positions, commands) {
+            const occupiedPositions = new Set();
+            
+            // 标记所有已占用的位置
+            Object.values(positions).forEach(pos => {
+                if (pos && pos.row < maxRows && pos.col < maxCols) {
+                    occupiedPositions.add(`${pos.row}-${pos.col}`);
+                }
+            });
+            
+            // 找到第一个空白位置
+            for (let row = 0; row < maxRows; row++) {
+                for (let col = 0; col < maxCols; col++) {
+                    const posKey = `${row}-${col}`;
+                    if (!occupiedPositions.has(posKey)) {
+                        return { row, col };
+                    }
+                }
+            }
+            
+            return null; // 没有可用位置
+        }
+
+        // 根据位置查找用户命令
+        function findUserCommandAtPosition(row, col, commands) {
+            const positions = commandPositions[activeCategory] || {};
+            return commands.find(cmd => {
+                const pos = positions[cmd.id];
+                return pos && pos.row === row && pos.col === col;
+            });
+        }
+
+        // 选择用户命令
+        function selectUserCommand(commandId) {
+            const userCategoryCommands = userCommands[activeCategory] || {};
+            selectedCommand = userCategoryCommands[commandId];
+            parameters = {};
+            
+            // 清空双参数状态（切换命令时重置）
+            dualParameters = [];
+            
+            // 更新选中状态
+            document.querySelectorAll('.command-card').forEach(card => {
+                const isSelected = card.dataset.commandId === commandId;
+                card.classList.toggle('selected', isSelected);
+            });
+
+            renderParameterForm();
+        }
+
+        // 网格拖拽处理
+        let draggedCommandId = null;
+        let draggedFromPosition = null;
+
+        function handleCommandDragStart(event) {
+            const commandCard = event.target.closest('.command-card');
+            const gridCell = event.target.closest('.grid-cell');
+            
+            draggedCommandId = commandCard.dataset.commandId;
+            draggedFromPosition = {
+                row: parseInt(gridCell.dataset.row),
+                col: parseInt(gridCell.dataset.col)
+            };
+            
+            // 添加拖拽样式
+            commandCard.classList.add('dragging');
+            
+            // 设置拖拽数据
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/html', commandCard.outerHTML);
+            
+            // 高亮所有可放置的区域
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.add('drop-target');
+            });
+        }
+
+        function handleGridDragOver(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleGridDrop(event, targetRow, targetCol) {
+            event.preventDefault();
+            
+            if (!draggedCommandId) return;
+            
+            const targetPosition = { row: targetRow, col: targetCol };
+            const positions = commandPositions[activeCategory];
+            
+            // 检查目标位置是否有命令
+            const targetCommandId = Object.keys(positions || {}).find(cmdId => {
+                const pos = positions[cmdId];
+                return pos && pos.row === targetRow && pos.col === targetCol;
+            });
+            
+            if (targetCommandId && targetCommandId !== draggedCommandId) {
+                // 目标位置有其他命令，交换位置
+                const draggedPos = positions[draggedCommandId];
+                positions[targetCommandId] = draggedPos;
+                positions[draggedCommandId] = targetPosition;
+            } else if (!targetCommandId) {
+                // 目标位置为空，直接移动
+                positions[draggedCommandId] = targetPosition;
+            }
+            // 如果目标位置是自己，什么都不做
+            
+            // 清理拖拽状态
+            cleanupDragState();
+            
+            // 重新渲染
+            renderCommands();
+            
+            // 更新项目状态
+            updateProjectUserCommands();
+            
+            // 更新标签计数
+            updateTabCounts();
+        }
+
+        function cleanupDragState() {
+            // 清除所有拖拽相关的样式
+            document.querySelectorAll('.command-card.dragging').forEach(card => {
+                card.classList.remove('dragging');
+            });
+            
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.remove('drop-target', 'drop-invalid');
+            });
+            
+            draggedCommandId = null;
+            draggedFromPosition = null;
+        }
+
+        // 监听拖拽结束事件
+        document.addEventListener('dragend', function(event) {
+            if (event.target.classList.contains('command-card')) {
+                cleanupDragState();
+            }
+        });
+
+        // 更新项目中的命令位置
+        function updateProjectCommandPositions() {
+            if (currentProject) {
+                currentProject.commandPositions = {...commandPositions};
+                currentProject.timestamp = new Date().toISOString();
+            }
+        }
+
+        // 渲染参数表单
+        function renderParameterForm() {
+            const container = document.getElementById('paramsContent');
+            
+            if (!selectedCommand) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚙️</div>
+                        <p>${t('selectCommand')}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 检查是否是用户自定义命令
+            const isUserCommand = selectedCommand.id && selectedCommand.id.startsWith('user_cmd_');
+            
+            if (isUserCommand) {
+                // 新的用户自定义命令结构
+                const parameterRows = selectedCommand.parameterRows || [];
+                const examples = selectedCommand.examples || [];
+                
+                // 先初始化参数数组
+                initializeDualParameters(parameterRows.length, parameterRows);
+                
+                let parameterFormHTML = '';
+                
+                // 生成参数行表单
+                parameterRows.forEach((row, index) => {
+                    // 获取当前行的值，如果不存在则使用第一个可用选项作为默认值
+                    const defaultValue1 = (row.options1 && row.options1.length > 0) ? row.options1[0] : '';
+                    const defaultValue2 = (row.options2 && row.options2.length > 0) ? row.options2[0] : '';
+                    const currentValue1 = (dualParameters[index] && dualParameters[index][0] !== '') ? dualParameters[index][0] : defaultValue1;
+                    const currentValue2 = (dualParameters[index] && dualParameters[index][1] !== '') ? dualParameters[index][1] : defaultValue2;
+                    
+                    parameterFormHTML += `
+                        <div class="param-group">
+                            <label class="param-label">${row.description}</label>
+                            <div class="param-dual-select">
+                                <select class="param-input" onchange="updateDualParameter(${index}, 0, this.value)">
+                                    ${(row.options1 || []).map(option => `
+                                        <option value="${option}" ${currentValue1 === option ? 'selected' : ''}>${option}</option>
+                                    `).join('')}
+                                    <option value="" ${currentValue1 === '' ? 'selected' : ''}>空白</option>
+                                </select>
+                                <select class="param-input" onchange="updateDualParameter(${index}, 1, this.value)">
+                                    ${(row.options2 || []).map(option => `
+                                        <option value="${option}" ${currentValue2 === option ? 'selected' : ''}>${option}</option>
+                                    `).join('')}
+                                    <option value="" ${currentValue2 === '' ? 'selected' : ''}>空白</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // 生成示例命令列表
+                let examplesHTML = '';
+                if (examples.length > 0) {
+                    examplesHTML = `
+                        <div class="examples-section">
+                            <h4 style="margin: 16px 0 8px 0; font-size: 14px; color: var(--text-primary);">示例命令</h4>
+                            ${examples.map((example, index) => `
+                                <div class="example-item">
+                                    <code class="example-command">${example}</code>
+                                    <button class="btn btn-primary" style="padding: 4px 8px; font-size: 12px; margin-left: 8px;" onclick="addExampleToScript('${example}')">添加</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+                
+                container.innerHTML = `
+                    <div class="params-form">
+                        <div class="command-info">
+                            <h3>${selectedCommand.name}</h3>
+                            <p>${selectedCommand.desc}</p>
+                        </div>
+                        ${parameterFormHTML}
+                        ${examplesHTML}
+                        ${parameterRows.length > 0 ? '<button class="add-command-btn" onclick="addCommand()" style="margin-top: 16px;">生成并添加到脚本</button>' : ''}
+                    </div>
+                `;
+                
+                // 参数已在前面初始化，不需要重复初始化
+                
+            } else {
+                // 旧的预定义命令结构（保持兼容）
+                const template = parameterTemplates[selectedCommand.name] || {};
+                const commandParams = selectedCommand.params || [];
+                
+                container.innerHTML = `
+                    <div class="params-form">
+                        <div class="command-info">
+                            <h3>${selectedCommand.name}</h3>
+                            <p>${selectedCommand.desc}</p>
+                        </div>
+                        ${commandParams.map(param => {
+                            const paramTemplate = template[param];
+                            return `
+                                <div class="param-group">
+                                    <label class="param-label">${param}</label>
+                                    ${paramTemplate?.type === 'select' ? `
+                                        <select class="param-input" onchange="updateParameter('${param}', this.value)">
+                                            ${paramTemplate.options.map(option => `
+                                                <option value="${option}" ${option === paramTemplate.default ? 'selected' : ''}>${option}</option>
+                                            `).join('')}
+                                        </select>
+                                    ` : `
+                                        <input type="${paramTemplate?.type || 'text'}" 
+                                               class="param-input" 
+                                               placeholder="输入 ${param}"
+                                               value="${paramTemplate?.default || ''}"
+                                               ${paramTemplate?.step ? `step="${paramTemplate.step}"` : ''}
+                                               onchange="updateParameter('${param}', this.value)">
+                                    `}
+                                </div>
+                            `;
+                        }).join('')}
+                        <button class="add-command-btn" onclick="addCommand()">添加到脚本</button>
+                    </div>
+                `;
+
+                // 初始化参数
+                commandParams.forEach(param => {
+                    const paramTemplate = template[param];
+                    if (paramTemplate?.default) {
+                        parameters[param] = paramTemplate.default;
+                    }
+                });
+            }
+        }
+
+        // 更新参数
+        function updateParameter(param, value) {
+            parameters[param] = value;
+        }
+        
+        // 双参数管理
+        let dualParameters = [];
+        
+        // 初始化双参数数组
+        function initializeDualParameters(rowCount, parameterRows = []) {
+            // 只有在数组长度不匹配时才重新初始化，保留现有值
+            if (dualParameters.length !== rowCount) {
+                const oldParameters = [...dualParameters];
+                dualParameters = [];
+                
+                for (let i = 0; i < rowCount; i++) {
+                    // 如果旧数组中有值，保留它，否则使用默认值
+                    if (oldParameters[i]) {
+                        dualParameters.push([...oldParameters[i]]);
+                    } else {
+                        // 使用第一个可用选项作为默认值，如果没有选项则使用空字符串
+                        const row = parameterRows[i];
+                        const defaultValue1 = (row && row.options1 && row.options1.length > 0) ? row.options1[0] : '';
+                        const defaultValue2 = (row && row.options2 && row.options2.length > 0) ? row.options2[0] : '';
+                        dualParameters.push([defaultValue1, defaultValue2]); // [参数框1值, 参数框2值]
+                    }
+                }
+                
+                console.log('初始化/更新参数数组:', dualParameters);
+            }
+        }
+        
+        // 更新双参数值
+        function updateDualParameter(rowIndex, selectIndex, value) {
+            if (dualParameters[rowIndex]) {
+                // 确保 dualParameters 数组已正确初始化
+                dualParameters[rowIndex][selectIndex] = value;
+                
+                // 调试日志（可以在开发时查看）
+                console.log(`更新参数 [${rowIndex}][${selectIndex}] = "${value}"`);
+                console.log('当前所有参数:', dualParameters);
+            }
+        }
+        
+        // 添加示例命令到脚本
+        function addExampleToScript(example) {
+            if (!checkProjectRequired('添加示例命令到脚本')) return;
+            
+            // 保存当前状态用于撤销
+            saveScriptState();
+            
+            // 计算最佳插入位置
+            const insertPosition = calculateBestInsertPosition();
+            
+            // 在指定位置插入示例命令
+            scriptLines.splice(insertPosition, 0, example);
+            
+            renderScript();
+            
+            // 更新项目状态
+            if (currentProject) {
+                currentProject.scriptLines = [...scriptLines];
+                currentProject.timestamp = new Date().toISOString();
+            }
+            
+            updateUndoButton();
+            
+            // 延迟一点时间确保 DOM 更新完成，然后滚动到新插入的行并高亮显示
+            setTimeout(() => {
+                scrollToLine(insertPosition);
+                highlightNewLine(insertPosition);
+            }, 100);
+        }
+
+        // 添加命令到脚本
+        function addCommand() {
+            if (!checkProjectRequired('添加命令到脚本')) return;
+            if (!selectedCommand) return;
+            
+            // 保存当前状态用于撤销
+            saveScriptState();
+            
+            let commandLine = '';
+            
+            // 检查是否是用户自定义命令
+            const isUserCommand = selectedCommand.id && selectedCommand.id.startsWith('user_cmd_');
+            
+            if (isUserCommand) {
+                // 新的用户自定义命令：使用双参数生成
+                commandLine = selectedCommand.name;
+                
+                console.log('生成命令开始:', commandLine);
+                console.log('dualParameters:', dualParameters);
+                
+                if (dualParameters && dualParameters.length > 0) {
+                    dualParameters.forEach((paramPair, index) => {
+                        console.log(`处理参数行 ${index}:`, paramPair);
+                        
+                        // 添加非空的参数值（注意：空字符串""表示用户选择了空白选项）
+                        if (paramPair[0] && paramPair[0].trim() !== '') {
+                            commandLine += ` ${paramPair[0]}`;
+                            console.log(`添加参数框1: "${paramPair[0]}"`);
+                        }
+                        if (paramPair[1] && paramPair[1].trim() !== '') {
+                            commandLine += ` ${paramPair[1]}`;
+                            console.log(`添加参数框2: "${paramPair[1]}"`);
+                        }
+                    });
+                }
+                
+                console.log('最终命令:', commandLine);
+                
+            } else if (selectedCommand.template) {
+                // 旧版用户模板方式（保持兼容）
+                commandLine = selectedCommand.template;
+                if (selectedCommand.params) {
+                    selectedCommand.params.forEach(param => {
+                        const value = parameters[param] || '';
+                        const placeholder = `{${param}}`;
+                        commandLine = commandLine.replace(new RegExp(placeholder, 'g'), value);
+                    });
+                }
+            } else {
+                // 预定义命令方式
+                commandLine = selectedCommand.name;
+                const template = parameterTemplates[selectedCommand.name] || {};
+                
+                if (selectedCommand.params) {
+                    selectedCommand.params.forEach(param => {
+                        const value = parameters[param] || template[param]?.default || '';
+                        if (value) commandLine += ` ${value}`;
+                    });
+                }
+            }
+            
+            // 清理多余的空格
+            commandLine = commandLine.replace(/\s+/g, ' ').trim();
+            
+            // 计算最佳插入位置
+            const insertPosition = calculateBestInsertPosition();
+            
+            // 在指定位置插入新命令
+            scriptLines.splice(insertPosition, 0, commandLine);
+            
+            renderScript();
+            
+            // 不清空参数状态，让用户可以重复使用相同参数
+            // parameters = {};
+            // dualParameters = [];
+            
+            // 更新项目状态
+            if (currentProject) {
+                currentProject.scriptLines = [...scriptLines];
+                currentProject.timestamp = new Date().toISOString();
+            }
+            
+            updateUndoButton();
+            
+            // 延迟一点时间确保 DOM 更新完成，然后滚动到新插入的行并高亮显示
+            setTimeout(() => {
+                scrollToLine(insertPosition);
+                highlightNewLine(insertPosition);
+            }, 100);
+        }
+
+        // 高亮显示新插入的行
+        function highlightNewLine(index) {
+            const scriptLineElements = document.querySelectorAll('.script-line');
+            if (scriptLineElements[index]) {
+                const lineElement = scriptLineElements[index];
+                
+                // 添加高亮效果
+                lineElement.style.backgroundColor = '#3b82f6';
+                lineElement.style.color = 'white';
+                lineElement.style.transform = 'scale(1.02)';
+                lineElement.style.transition = 'all 0.3s ease';
+                
+                // 1.5秒后移除高亮效果
+                setTimeout(() => {
+                    lineElement.style.backgroundColor = '';
+                    lineElement.style.color = '';
+                    lineElement.style.transform = '';
+                    lineElement.style.transition = 'all 0.5s ease';
+                }, 1500);
+            }
+        }
+
+        // 渲染脚本
+        function renderScript() {
+            const container = document.getElementById('scriptContent');
+            const lineCount = document.getElementById('lineCount');
+            
+            lineCount.textContent = `${scriptLines.length} ${t('lines')}`;
+            
+            if (scriptLines.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">👁️</div>
+                        <p>${t('scriptEmpty')}</p>
+                        <p style="font-size: 12px; margin-top: 8px; color: #9ca3af;">${t('addAfterCommand')}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="step-legend">
+                    <div class="legend-item">
+                        <div class="legend-color step-init"></div>
+                        <span>${t('init')}</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color step-geometry"></div>
+                        <span>${t('geo')}</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color step-material"></div>
+                        <span>${t('mat')}</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color step-particle"></div>
+                        <span>${t('part')}</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color step-solver"></div>
+                        <span>${t('sol')}</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color step-output"></div>
+                        <span>${t('out')}</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color step-other"></div>
+                        <span>${t('other')}</span>
+                    </div>
+                </div>
+                <div class="drag-hint" id="dragHint">
+                    <span>⋮⋮</span>
+                    <span>${t('dragHint')}</span>
+                </div>
+                <div class="script-lines" id="scriptLines">
+                    ${scriptLines.map((line, index) => {
+                        const step = getCommandStep(line);
+                        const stepClass = stepToClassMapping[step] || 'step-init';
+                        return `
+                            <div class="script-line ${stepClass}" draggable="true" data-index="${index}" data-step="${step}" ondblclick="editScriptLine(${index})">
+                                <div style="display: flex; align-items: center; flex: 1;">
+                                    <span class="drag-handle">⋮⋮</span>
+                                    <span class="line-number" style="color: #9ca3af; margin-right: 8px; font-size: 11px; min-width: 20px;">${index + 1}.</span>
+                                    <span class="line-content">${line}</span>
+                                </div>
+                                <button class="delete-btn" data-index="${index}">×</button>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            // 为删除按钮添加事件监听
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const index = parseInt(this.dataset.index);
+                    removeScriptLine(index);
+                });
+            });
+            
+            // 添加拖拽事件监听
+            setupDragAndDrop();
+            
+            // 更新撤销按钮状态
+            updateUndoButton();
+        }
+
+        // 删除脚本行
+        function removeScriptLine(index) {
+            // 保存当前状态用于撤销
+            saveScriptState();
+            
+            scriptLines.splice(index, 1);
+            renderScript();
+            updateUndoButton();
+        }
+
+        // 清空脚本
+        function clearScript() {
+            if (!checkProjectRequired('清空脚本')) return;
+            if (scriptLines.length > 0) {
+                // 保存当前状态用于撤销
+                saveScriptState();
+                
+                scriptLines = [];
+                renderScript();
+                updateUndoButton();
+            }
+        }
+
+        // 插入新行功能
+        function insertNewLine() {
+            if (!checkProjectRequired('插入新行')) return;
+            // 保存当前状态用于撤销
+            saveScriptState();
+            
+            // 在末尾添加空行
+            scriptLines.push('');
+            
+            // 重新渲染脚本
+            renderScript();
+            
+            // 更新项目状态
+            if (currentProject) {
+                currentProject.scriptLines = [...scriptLines];
+                currentProject.timestamp = new Date().toISOString();
+            }
+            
+            updateUndoButton();
+            
+            // 延迟一点时间确保DOM更新完成，然后自动进入编辑状态
+            setTimeout(() => {
+                const newIndex = scriptLines.length - 1;
+                scrollToLine(newIndex);
+                editScriptLine(newIndex);
+            }, 50);
+        }
+
+        // 滚动到指定行
+        function scrollToLine(index) {
+            const scriptContent = document.getElementById('scriptContent');
+            const scriptLines = document.querySelectorAll('.script-line');
+            
+            if (scriptLines[index] && scriptContent) {
+                // 滚动到目标行
+                scriptLines[index].scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        }
+
+        // 计算最佳插入位置
+        function calculateBestInsertPosition() {
+            // 获取"添加到脚本"按钮的位置
+            const addButton = document.querySelector('.add-command-btn');
+            if (!addButton) {
+                return scriptLines.length; // 如果找不到按钮，插入到末尾
+            }
+            
+            const buttonRect = addButton.getBoundingClientRect();
+            const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+            
+            // 获取脚本预览区域
+            const scriptContent = document.getElementById('scriptContent');
+            if (!scriptContent) {
+                return scriptLines.length; // 如果找不到脚本区域，插入到末尾
+            }
+            
+            const scriptContentRect = scriptContent.getBoundingClientRect();
+            
+            // 如果按钮位置在脚本区域上方，插入到开头
+            if (buttonCenterY < scriptContentRect.top) {
+                return 0;
+            }
+            
+            // 如果按钮位置在脚本区域下方，插入到末尾
+            if (buttonCenterY > scriptContentRect.bottom) {
+                return scriptLines.length;
+            }
+            
+            // 获取所有脚本行
+            const scriptLineElements = document.querySelectorAll('.script-line');
+            if (scriptLineElements.length === 0) {
+                return 0; // 如果没有脚本行，插入到开头
+            }
+            
+            // 找到与按钮位置最接近的脚本行
+            let bestIndex = scriptLines.length;
+            let minDistance = Infinity;
+            
+            scriptLineElements.forEach((lineElement, index) => {
+                const lineRect = lineElement.getBoundingClientRect();
+                const lineCenterY = lineRect.top + lineRect.height / 2;
+                const distance = Math.abs(buttonCenterY - lineCenterY);
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    // 如果按钮在该行下方，插入到该行后面；否则插入到该行前面
+                    bestIndex = buttonCenterY > lineCenterY ? index + 1 : index;
+                }
+            });
+            
+            // 确保插入位置在有效范围内
+            return Math.max(0, Math.min(bestIndex, scriptLines.length));
+        }
+
+        // 设置拖拽功能
+        function setupDragAndDrop() {
+            const scriptContainer = document.getElementById('scriptLines');
+            const dragHint = document.getElementById('dragHint');
+            if (!scriptContainer) return;
+
+            let draggedElement = null;
+            let draggedIndex = null;
+            let hasUserDragged = localStorage.getItem('hasUserDragged') === 'true';
+
+            // 如果用户已经拖拽过，隐藏提示
+            if (hasUserDragged && dragHint) {
+                dragHint.classList.add('hidden');
+            }
+
+            // 为每个脚本行添加拖拽事件
+            const scriptLineElements = scriptContainer.querySelectorAll('.script-line');
+            
+            scriptLineElements.forEach((element, index) => {
+                // 拖拽开始
+                element.addEventListener('dragstart', function(e) {
+                    // 如果正在编辑，禁止拖拽
+                    if (this.classList.contains('editing')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    
+                    draggedElement = this;
+                    draggedIndex = parseInt(this.dataset.index);
+                    this.classList.add('dragging');
+                    
+                    // 隐藏拖拽提示并记住用户已经拖拽过
+                    if (dragHint && !hasUserDragged) {
+                        dragHint.classList.add('hidden');
+                        localStorage.setItem('hasUserDragged', 'true');
+                        hasUserDragged = true;
+                    }
+                    
+                    // 设置拖拽数据
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/html', this.outerHTML);
+                });
+
+                // 拖拽结束
+                element.addEventListener('dragend', function(e) {
+                    this.classList.remove('dragging');
+                    
+                    // 清除所有拖拽状态
+                    scriptLineElements.forEach(el => {
+                        el.classList.remove('drag-over');
+                    });
+                    
+                    draggedElement = null;
+                    draggedIndex = null;
+                });
+
+                // 拖拽进入
+                element.addEventListener('dragenter', function(e) {
+                    e.preventDefault();
+                    if (this !== draggedElement) {
+                        this.classList.add('drag-over');
+                    }
+                });
+
+                // 拖拽经过
+                element.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                });
+
+                // 拖拽离开
+                element.addEventListener('dragleave', function(e) {
+                    // 只有在真正离开元素时才移除样式
+                    if (!this.contains(e.relatedTarget)) {
+                        this.classList.remove('drag-over');
+                    }
+                });
+
+                // 放置
+                element.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+                    
+                    if (this !== draggedElement && draggedElement) {
+                        const targetIndex = parseInt(this.dataset.index);
+                        
+                        // 重新排列脚本行
+                        moveScriptLine(draggedIndex, targetIndex);
+                    }
+                });
+            });
+        }
+
+        // 移动脚本行
+        function moveScriptLine(fromIndex, toIndex) {
+            if (fromIndex === toIndex) return;
+            
+            // 保存当前状态用于撤销
+            saveScriptState();
+            
+            // 保存被移动的行
+            const movedLine = scriptLines[fromIndex];
+            
+            // 从原位置删除
+            scriptLines.splice(fromIndex, 1);
+            
+            // 插入到新位置
+            scriptLines.splice(toIndex, 0, movedLine);
+            
+            // 重新渲染脚本
+            renderScript();
+            
+            // 更新项目状态
+            if (currentProject) {
+                currentProject.scriptLines = [...scriptLines];
+                currentProject.timestamp = new Date().toISOString();
+            }
+            
+            updateUndoButton();
+            
+            // 显示移动提示（可选）
+            console.log(`脚本行已从位置 ${fromIndex + 1} 移动到位置 ${toIndex + 1}`);
+        }
+
+        // 编辑脚本行
+        function editScriptLine(index) {
+            const scriptLines = document.querySelectorAll('.script-line');
+            const lineElement = scriptLines[index];
+            
+            if (!lineElement || lineElement.classList.contains('editing')) {
+                return; // 如果已经在编辑状态，忽略
+            }
+            
+            // 退出其他正在编辑的行
+            exitAllEditingStates();
+            
+            const lineContent = lineElement.querySelector('.line-content');
+            const deleteBtn = lineElement.querySelector('.delete-btn');
+            const currentText = lineContent.textContent;
+            
+            // 禁用拖拽
+            lineElement.draggable = false;
+            lineElement.classList.add('editing');
+            
+            // 替换内容为编辑界面
+            lineContent.innerHTML = `<input type="text" class="edit-input" value="${currentText}">`;
+            
+            // 替换删除按钮为编辑操作按钮
+            deleteBtn.innerHTML = `
+                <div class="edit-actions">
+                    <button class="edit-btn save" data-action="save">✓</button>
+                    <button class="edit-btn cancel" data-action="cancel">✕</button>
+                </div>
+            `;
+            
+            // 移除原来的onclick事件
+            deleteBtn.onclick = null;
+            
+            // 为编辑按钮添加事件监听
+            const saveBtn = deleteBtn.querySelector('.edit-btn.save');
+            const cancelBtn = deleteBtn.querySelector('.edit-btn.cancel');
+            
+            saveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                saveScriptLine(index);
+            });
+            
+            cancelBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                cancelEdit(index, currentText);
+            });
+            
+            // 获取输入框并聚焦
+            const input = lineElement.querySelector('.edit-input');
+            input.focus();
+            input.select();
+            
+            // 监听键盘事件
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveScriptLine(index);
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelEdit(index, currentText);
+                }
+            });
+            
+            // 监听失去焦点事件
+            input.addEventListener('blur', function(e) {
+                // 延迟执行，以便按钮点击事件能够触发
+                setTimeout(() => {
+                    // 检查焦点是否在编辑按钮上
+                    const activeElement = document.activeElement;
+                    const isEditButtonFocused = activeElement && 
+                        (activeElement.classList.contains('edit-btn') || 
+                         activeElement.closest('.edit-actions'));
+                    
+                    // 只有在焦点不在编辑按钮上且仍在编辑状态时才自动保存
+                    if (lineElement.classList.contains('editing') && 
+                        !lineElement.contains(document.activeElement) &&
+                        !isEditButtonFocused) {
+                        saveScriptLine(index);
+                    }
+                }, 150);
+            });
+        }
+
+        // 保存编辑
+        function saveScriptLine(index) {
+            const lineElement = document.querySelectorAll('.script-line')[index];
+            const input = lineElement.querySelector('.edit-input');
+            
+            if (!input) return;
+            
+            const newText = input.value.trim();
+            
+            // 如果用户输入为空，删除这一行
+            if (newText === '') {
+                // 保存当前状态用于撤销
+                saveScriptState();
+                
+                // 删除空行
+                scriptLines.splice(index, 1);
+                
+                // 更新项目状态
+                if (currentProject) {
+                    currentProject.scriptLines = [...scriptLines];
+                    currentProject.timestamp = new Date().toISOString();
+                }
+                
+                // 重新渲染脚本
+                renderScript();
+                updateUndoButton();
+                return;
+            }
+            
+            // 只有当文本真正改变时才保存状态
+            if (newText !== scriptLines[index]) {
+                // 保存当前状态用于撤销
+                saveScriptState();
+                
+                // 更新数据
+                scriptLines[index] = newText;
+                
+                // 更新项目状态
+                if (currentProject) {
+                    currentProject.scriptLines = [...scriptLines];
+                    currentProject.timestamp = new Date().toISOString();
+                }
+                
+                updateUndoButton();
+            }
+            
+            // 重新渲染脚本
+            renderScript();
+        }
+
+        // 取消编辑
+        function cancelEdit(index, originalText) {
+            const lineElement = document.querySelectorAll('.script-line')[index];
+            const lineContent = lineElement.querySelector('.line-content');
+            const deleteBtn = lineElement.querySelector('.delete-btn');
+            
+            // 恢复原始状态
+            lineElement.classList.remove('editing');
+            lineElement.draggable = true;
+            
+            // 恢复原始内容
+            lineContent.innerHTML = originalText;
+            
+            // 恢复删除按钮
+            deleteBtn.innerHTML = '×';
+            deleteBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                removeScriptLine(index);
+            };
+        }
+
+        // 退出所有编辑状态
+        function exitAllEditingStates() {
+            const editingLines = document.querySelectorAll('.script-line.editing');
+            editingLines.forEach((line) => {
+                const input = line.querySelector('.edit-input');
+                if (input) {
+                    const index = parseInt(line.dataset.index);
+                    const originalText = scriptLines[index];
+                    cancelEdit(index, originalText);
+                }
+            });
+        }
+
+        // 新建项目
+        async function newProject() {
+            // 先检查浏览器支持，决定使用哪种方式
+            const supportsFilePicker = window.showSaveFilePicker;
+            
+            // 获取项目名称
+            const name = prompt('请输入项目名称：');
+            if (!name || !name.trim()) {
+                return; // 用户取消或未输入名称
+            }
+            
+            const newProjectName = name.trim();
+            
+            // 重置所有状态
+            activeCategory = '初始化设置';
+            selectedCommand = null;
+            scriptLines = [];
+            parameters = {};
+            currentFileHandle = null;
+            previousScriptState = null;
+            commandPositions = {};
+            userCommands = {};
+            
+            // 创建项目对象
+            currentProject = {
+                name: newProjectName,
+                activeCategory: activeCategory,
+                selectedCommand: selectedCommand,
+                scriptLines: [...scriptLines],
+                parameters: {...parameters},
+                commandPositions: {...commandPositions},
+                userCommands: {...userCommands},
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                if (supportsFilePicker) {
+                    // 使用文件系统API，但需要重新触发用户手势
+                    // 显示一个确认对话框来重新获取用户手势
+                    const shouldSaveNow = confirm(`项目 "${newProjectName}" 已准备好！\n\n点击"确定"选择保存位置，点击"取消"稍后手动保存。`);
+                    
+                    if (shouldSaveNow) {
+                        const fileHandle = await window.showSaveFilePicker({
+                            suggestedName: `${newProjectName}.json`,
+                            types: [{
+                                description: 'LIGGGHTS项目文件',
+                                accept: {
+                                    'application/json': ['.json']
+                                }
+                            }]
+                        });
+                        
+                        currentFileHandle = fileHandle;
+                        // 更新全局项目名称
+                        projectName = newProjectName;
+                        await saveToFile();
+                        
+                        // 成功后更新界面
+                        resetInterface();
+                        updateToolbarTitle();
+                        updateUndoButton();
+                        updateInterfaceState();
+                        
+                        alert(`项目 "${newProjectName}" 创建并保存成功！`);
+                    } else {
+                        // 用户选择稍后保存，先创建项目
+                        projectName = newProjectName;
+                        
+                        // 更新界面
+                        resetInterface();
+                        updateToolbarTitle();
+                        updateUndoButton();
+                        updateInterfaceState();
+                        
+                        alert(`项目 "${newProjectName}" 已创建！\n\n请记得使用"保存"按钮保存项目文件。`);
+                    }
+                } else {
+                    // 浏览器不支持，直接下载
+                    projectName = newProjectName;
+                    downloadProjectFile();
+                    
+                    // 更新界面
+                    resetInterface();
+                    updateToolbarTitle();
+                    updateUndoButton();
+                    updateInterfaceState();
+                    
+                    alert(`项目 "${newProjectName}" 创建成功！\n注意：您的浏览器不支持直接文件保存。`);
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // 用户取消了保存，恢复初始状态
+                    projectName = '';
+                    currentProject = null;
+                    currentFileHandle = null;
+                    // 不更新界面，保持禁用状态
+                } else {
+                    console.error('创建项目失败:', error);
+                    
+                    // 如果是用户手势错误，先创建项目，然后提示用户手动保存
+                    if (error.message && error.message.includes('user gesture')) {
+                        projectName = newProjectName;
+                        
+                        // 更新界面
+                        resetInterface();
+                        updateToolbarTitle();
+                        updateUndoButton();
+                        updateInterfaceState();
+                        
+                        alert(`项目 "${newProjectName}" 已创建！\n\n由于浏览器安全限制，请点击"保存"按钮手动保存项目文件。`);
+                    } else {
+                        alert(`项目创建失败：${error.message}`);
+                        // 发生错误时也恢复初始状态
+                        projectName = '';
+                        currentProject = null;
+                        currentFileHandle = null;
+                    }
+                }
+            }
+        }
+
+        // 保存项目
+        async function saveProject() {
+            if (!projectName) {
+                alert('请先创建项目！');
+                return;
+            }
+            
+            // 更新项目数据
+            currentProject = {
+                name: projectName,
+                activeCategory: activeCategory,
+                selectedCommand: selectedCommand,
+                scriptLines: [...scriptLines],
+                parameters: {...parameters},
+                commandPositions: {...commandPositions},
+                userCommands: {...userCommands},
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                if (currentFileHandle) {
+                    // 有文件句柄，尝试直接覆盖保存
+                    try {
+                        await saveToFile();
+                        alert(`项目 "${projectName}" 保存成功！`);
+                        return; // 保存成功，直接返回
+                    } catch (fileError) {
+                        // 如果是文件访问错误，提示用户并重新选择位置
+                        if (fileError.message.includes('文件已被移动或删除')) {
+                            const shouldChooseNew = confirm(`⚠️ ${fileError.message}\n\n点击"确定"选择新的保存位置，点击"取消"取消保存。`);
+                            if (!shouldChooseNew) {
+                                return; // 用户取消保存
+                            }
+                            // 继续执行下面的文件选择逻辑
+                        } else {
+                            // 其他错误直接抛出
+                            throw fileError;
+                        }
+                    }
+                }
+                
+                if (window.showSaveFilePicker) {
+                    // 没有文件句柄或文件句柄失效，选择保存位置
+                    const fileHandle = await window.showSaveFilePicker({
+                        suggestedName: `${projectName}.json`,
+                        types: [{
+                            description: 'LIGGGHTS项目文件',
+                            accept: {
+                                'application/json': ['.json']
+                            }
+                        }]
+                    });
+                    
+                    currentFileHandle = fileHandle;
+                    await saveToFile();
+                    alert(`项目 "${projectName}" 保存成功！`);
+                } else {
+                    // 浏览器不支持，使用下载方式
+                    downloadProjectFile();
+                    alert(`项目 "${projectName}" 已下载！`);
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('保存项目失败:', error);
+                    alert(`保存项目失败：${error.message}`);
+                }
+            }
+        }
+
+        // 保存到文件（使用文件句柄）
+        async function saveToFile() {
+            if (!currentFileHandle) {
+                throw new Error('没有文件句柄');
+            }
+            
+            try {
+                const dataStr = JSON.stringify(currentProject, null, 2);
+                const writable = await currentFileHandle.createWritable();
+                await writable.write(dataStr);
+                await writable.close();
+            } catch (error) {
+                // 检查是否是文件访问权限错误（文件被移动/删除）
+                if (error.name === 'NotAllowedError' || 
+                    error.name === 'NotFoundError' || 
+                    error.message.includes('not allowed') ||
+                    error.message.includes('not found')) {
+                    
+                    // 清除无效的文件句柄
+                    currentFileHandle = null;
+                    
+                    // 抛出自定义错误，提供更明确的信息
+                    throw new Error('文件已被移动或删除，无法保存到原位置。请选择新的保存位置。');
+                } else {
+                    // 其他错误直接传递
+                    throw error;
+                }
+            }
+        }
+
+        // 下载项目文件（回退方案）
+        function downloadProjectFile() {
+            const dataStr = JSON.stringify(currentProject, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${projectName}.json`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // 打开项目
+        async function openProject() {
+            try {
+                if (window.showOpenFilePicker) {
+                    // 使用文件系统API
+                    const [fileHandle] = await window.showOpenFilePicker({
+                        types: [{
+                            description: 'LIGGGHTS项目文件',
+                            accept: {
+                                'application/json': ['.json']
+                            }
+                        }]
+                    });
+                    
+                    const file = await fileHandle.getFile();
+                    const contents = await file.text();
+                    const projectData = JSON.parse(contents);
+                    
+                    // 保存文件句柄以便后续保存
+                    currentFileHandle = fileHandle;
+                    
+                    loadProject(projectData);
+                } else {
+                    // 浏览器不支持，使用传统方式
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    input.style.display = 'none';
+                    
+                    input.onchange = function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                try {
+                                    const projectData = JSON.parse(e.target.result);
+                                    // 传统方式打开的文件无法获取句柄
+                                    currentFileHandle = null;
+                                    loadProject(projectData);
+                                } catch (error) {
+                                    alert('项目文件格式错误！');
+                                }
+                            };
+                            reader.readAsText(file);
+                        }
+                    };
+                    
+                    document.body.appendChild(input);
+                    input.click();
+                    document.body.removeChild(input);
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // 用户取消了文件选择
+                    return;
+                } else {
+                    console.error('打开项目失败:', error);
+                    alert('打开项目失败！');
+                }
+            }
+        }
+
+        // 加载项目
+        function loadProject(projectData) {
+            // 验证项目数据
+            if (!projectData.name) {
+                alert('项目文件格式错误：缺少项目名称！');
+                return;
+            }
+            
+            // 恢复项目状态
+            currentProject = projectData;
+            projectName = projectData.name;
+            activeCategory = projectData.activeCategory || '初始化设置';
+            selectedCommand = projectData.selectedCommand || null;
+            scriptLines = [...(projectData.scriptLines || [])];
+            parameters = {...(projectData.parameters || {})};
+            // 兼容旧版本：优先使用新的commandPositions，回退到commandOrders
+            commandPositions = {...(projectData.commandPositions || projectData.commandOrders || {})}; 
+            userCommands = {...(projectData.userCommands || {})}; // 恢复用户命令
+            previousScriptState = null; // 重置撤销状态
+            
+            // 确保用户命令使用新格式（兼容性处理）
+            ensureCommandsNewFormat();
+            
+            // 重新渲染界面
+            resetInterface();
+            updateToolbarTitle();
+            updateUndoButton();
+            updateInterfaceState(); // 更新界面状态
+            
+            // 恢复当前分类标签
+            switchTab(activeCategory);
+            
+            // 更新标签计数
+            updateTabCounts();
+            
+            // 恢复脚本显示
+            renderScript();
+            
+            // 恢复命令选中状态
+            if (selectedCommand) {
+                setTimeout(() => {
+                    document.querySelectorAll('.command-card').forEach(card => {
+                        // 精确匹配命令名称
+                        const cardCommandName = card.querySelector('.command-name');
+                        if (cardCommandName && cardCommandName.textContent.trim() === selectedCommand.name) {
+                            card.classList.add('selected');
+                        }
+                    });
+                    renderParameterForm();
+                }, 100);
+            }
+            
+            // 根据是否有文件句柄显示不同的提示
+            if (currentFileHandle) {
+                alert(`项目 "${projectName}" 加载成功！\n✅ 支持覆盖保存 - 点击保存按钮将直接更新原文件`);
+            } else {
+                alert(`项目 "${projectName}" 加载成功！\n⚠️ 不支持覆盖保存 - 点击保存按钮将下载新文件`);
+            }
+        }
+
+        // 重置界面
+        function resetInterface() {
+            // 清除选中状态
+            document.querySelectorAll('.command-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // 清空搜索框
+            document.getElementById('searchInput').value = '';
+            
+            // 重新渲染所有界面组件
+            renderCommands();
+            renderParameterForm();
+            renderScript(); // 清空脚本区域
+            
+            // 更新标签计数
+            updateTabCounts();
+        }
+
+        // 更新工具栏标题
+        function updateToolbarTitle() {
+            const title = document.querySelector('.toolbar h1');
+            if (projectName) {
+                title.textContent = `LIGGGHTS 可视化界面 - ${projectName}`;
+            } else {
+                title.textContent = 'LIGGGHTS 可视化界面';
+            }
+        }
+
+        // 导入脚本
+        async function importScript() {
+            if (!checkProjectRequired('导入脚本')) return;
+            try {
+                if (window.showOpenFilePicker) {
+                    // 使用文件系统API
+                    const [fileHandle] = await window.showOpenFilePicker({
+                        types: [{
+                            description: 'LIGGGHTS脚本文件',
+                            accept: {
+                                'text/plain': ['.txt', '.in', '.lmp', '.liggghts'],
+                                'application/octet-stream': ['.in', '.lmp', '.liggghts']
+                            }
+                        }]
+                    });
+                    
+                    const file = await fileHandle.getFile();
+                    const contents = await file.text();
+                    
+                    processImportedScript(contents, file.name);
+                    
+                } else {
+                    // 浏览器不支持，使用传统方式
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.txt,.in,.lmp,.liggghts,text/plain';
+                    input.style.display = 'none';
+                    
+                    input.onchange = function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const contents = e.target.result;
+                                processImportedScript(contents, file.name);
+                            };
+                            reader.readAsText(file);
+                        }
+                    };
+                    
+                    document.body.appendChild(input);
+                    input.click();
+                    document.body.removeChild(input);
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // 用户取消了文件选择
+                    return;
+                } else {
+                    console.error('导入脚本失败:', error);
+                    alert('导入脚本失败！');
+                }
+            }
+        }
+
+        // 处理导入的脚本内容
+        function processImportedScript(contents, fileName) {
+            if (!contents || contents.trim() === '') {
+                alert('脚本文件为空！');
+                return;
+            }
+
+            // 预处理脚本内容，计算有效行数
+            const lines = contents.split('\n');
+            const validLines = lines.filter(line => {
+                const trimmedLine = line.trim();
+                return trimmedLine && !trimmedLine.startsWith('#') && !trimmedLine.startsWith('//');
+            });
+
+            const currentScriptCount = scriptLines.length;
+            const importLineCount = validLines.length;
+            
+            // 显示导入选择对话框
+            let mode = '';
+            if (currentScriptCount === 0) {
+                // 当前脚本为空，直接导入
+                mode = 'replace';
+            } else {
+                // 当前脚本不为空，让用户选择
+                const message = `脚本文件："${fileName}"\n有效命令行数：${importLineCount} 行\n当前脚本行数：${currentScriptCount} 行\n\n请选择导入模式：`;
+                
+                const choice = prompt(message + '\n\n输入 "1" = 替换当前脚本\n输入 "2" = 追加到当前脚本\n输入其他 = 取消导入', '1');
+                
+                if (choice === '1') {
+                    mode = 'replace';
+                } else if (choice === '2') {
+                    mode = 'append';
+                } else {
+                    alert('已取消导入');
+                    return;
+                }
+            }
+            
+            if (mode === 'replace') {
+                // 替换当前脚本
+                scriptLines = [];
+            }
+            
+            // 添加有效行到脚本
+            validLines.forEach(line => {
+                scriptLines.push(line.trim());
+            });
+            
+            // 更新界面显示
+            renderScript();
+            
+            // 更新项目状态
+            if (currentProject) {
+                currentProject.scriptLines = [...scriptLines];
+                currentProject.timestamp = new Date().toISOString();
+            }
+            
+            // 重置撤销状态，因为这是导入操作
+            previousScriptState = null;
+            updateUndoButton();
+            
+            // 显示导入结果
+            const actionText = mode === 'replace' ? '替换' : '追加';
+            const resultMessage = `✅ 脚本导入成功！\n\n📄 文件：${fileName}\n🔄 模式：${actionText}\n📝 导入：${importLineCount} 行\n📊 总计：${scriptLines.length} 行`;
+            
+            alert(resultMessage);
+        }
+
+        // 导出脚本
+        async function exportScript() {
+            if (!checkProjectRequired('导出脚本')) return;
+            if (scriptLines.length === 0) {
+                alert('当前脚本为空，无法导出！\n请先添加一些命令到脚本中。');
+                return;
+            }
+
+            try {
+                // 让用户选择导出格式
+                const format = prompt('选择导出格式：\n\n输入 "1" = LIGGGHTS输入文件 (.in)\n输入 "2" = 文本文件 (.txt)\n输入 "3" = LAMMPS脚本 (.lmp)\n输入其他 = 取消导出', '1');
+                
+                let fileExtension = '';
+                let fileDescription = '';
+                
+                switch (format) {
+                    case '1':
+                        fileExtension = '.in';
+                        fileDescription = 'LIGGGHTS输入文件';
+                        break;
+                    case '2':
+                        fileExtension = '.txt';
+                        fileDescription = '文本文件';
+                        break;
+                    case '3':
+                        fileExtension = '.lmp';
+                        fileDescription = 'LAMMPS脚本文件';
+                        break;
+                    default:
+                        alert('已取消导出');
+                        return;
+                }
+
+                // 生成脚本内容
+                const scriptContent = generateScriptContent(fileExtension);
+                
+                // 确定文件名
+                let fileName = projectName ? `${projectName}${fileExtension}` : `liggghts_script${fileExtension}`;
+                
+                if (window.showSaveFilePicker) {
+                    // 使用文件系统API
+                    const fileHandle = await window.showSaveFilePicker({
+                        suggestedName: fileName,
+                        types: [{
+                            description: fileDescription,
+                            accept: {
+                                'text/plain': [fileExtension]
+                            }
+                        }]
+                    });
+                    
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(scriptContent);
+                    await writable.close();
+                    
+                    alert(`✅ 脚本导出成功！\n\n📄 文件：${fileName}\n📝 行数：${scriptLines.length} 行\n💾 已保存到指定位置`);
+                    
+                } else {
+                    // 浏览器不支持，使用下载方式
+                    downloadScriptFile(scriptContent, fileName);
+                    alert(`✅ 脚本导出成功！\n\n📄 文件：${fileName}\n📝 行数：${scriptLines.length} 行\n📥 已下载到默认位置`);
+                }
+                
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // 用户取消了文件保存
+                    return;
+                } else {
+                    console.error('导出脚本失败:', error);
+                    alert('导出脚本失败！');
+                }
+            }
+        }
+
+        // 生成脚本内容
+        function generateScriptContent(fileExtension) {
+            const now = new Date();
+            const timestamp = now.toLocaleString();
+            
+            let content = '';
+            
+            // 添加文件头注释
+            content += `# ${fileExtension === '.in' ? 'LIGGGHTS Input Script' : fileExtension === '.lmp' ? 'LAMMPS Script' : 'Script'}\n`;
+            content += `# Generated by LIGGGHTS 可视化界面\n`;
+            content += `# Project: ${projectName || 'Untitled'}\n`;
+            content += `# Created: ${timestamp}\n`;
+            content += `# Total Commands: ${scriptLines.length}\n`;
+            content += `#\n`;
+            content += `# This script was automatically generated from the visual interface.\n`;
+            content += `# You can run this script directly with LIGGGHTS/LAMMPS.\n`;
+            content += `#\n\n`;
+            
+            // 添加分隔符
+            content += `${'#'.repeat(60)}\n`;
+            content += `# SCRIPT CONTENT\n`;
+            content += `${'#'.repeat(60)}\n\n`;
+            
+            // 添加脚本命令
+            scriptLines.forEach((line, index) => {
+                content += `${line}\n`;
+                
+                // 在关键命令后添加空行以提高可读性
+                const nextLine = scriptLines[index + 1];
+                if (line.startsWith('run') || 
+                    line.startsWith('minimize') || 
+                    line.startsWith('dump') ||
+                    line.startsWith('fix') ||
+                    (nextLine && (nextLine.startsWith('run') || nextLine.startsWith('minimize')))) {
+                    content += '\n';
+                }
+            });
+            
+            // 添加文件尾注释
+            content += `\n${'#'.repeat(60)}\n`;
+            content += `# END OF SCRIPT\n`;
+            content += `${'#'.repeat(60)}\n`;
+            
+            return content;
+        }
+
+        // 下载脚本文件（回退方案）
+        function downloadScriptFile(content, fileName) {
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // 导入命令库
+        async function importCommands() {
+            if (!checkProjectRequired('导入命令库')) return;
+            
+            try {
+                if (window.showOpenFilePicker) {
+                    // 使用文件系统API
+                    const [fileHandle] = await window.showOpenFilePicker({
+                        types: [{
+                            description: 'LIGGGHTS项目文件',
+                            accept: {
+                                'application/json': ['.json']
+                            }
+                        }]
+                    });
+                    
+                    const file = await fileHandle.getFile();
+                    const contents = await file.text();
+                    const projectData = JSON.parse(contents);
+                    
+                    processImportedCommands(projectData, file.name);
+                    
+                } else {
+                    // 浏览器不支持，使用传统方式
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    input.style.display = 'none';
+                    
+                    input.onchange = function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                try {
+                                    const projectData = JSON.parse(e.target.result);
+                                    processImportedCommands(projectData, file.name);
+                                } catch (error) {
+                                    alert('文件格式错误！请确保文件是有效的JSON项目文件。');
+                                }
+                            };
+                            reader.readAsText(file);
+                        }
+                    };
+                    
+                    document.body.appendChild(input);
+                    input.click();
+                    document.body.removeChild(input);
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // 用户取消了文件选择
+                    return;
+                } else {
+                    console.error('导入命令库失败:', error);
+                    alert('导入命令库失败！');
+                }
+            }
+        }
+
+        // 处理导入的命令库
+        function processImportedCommands(projectData, fileName) {
+            if (!projectData || typeof projectData !== 'object') {
+                alert('文件格式错误：不是有效的JSON项目文件！');
+                return;
+            }
+
+            // 提取命令库部分（如果不存在则说明是空项目或格式错误）
+            const commandLibrary = projectData.userCommands || {};
+            
+            if (!commandLibrary || typeof commandLibrary !== 'object') {
+                alert(`导入失败：项目文件 "${fileName}" 中没有命令库！\n\n可能的原因：\n1. 这是一个空项目（没有自定义命令）\n2. 文件格式不正确\n\n💡 提示：要分享命令库，请先在项目中创建一些自定义命令。`);
+                return;
+            }
+
+            let importedCount = 0;
+            let totalCommands = 0;
+            let categoriesAdded = [];
+
+            // 遍历命令库中的所有分类
+            Object.keys(commandLibrary).forEach(category => {
+                const categoryCommands = commandLibrary[category];
+                
+                if (!categoryCommands || typeof categoryCommands !== 'object') {
+                    console.warn(`跳过无效分类: ${category}`);
+                    return;
+                }
+
+                // 计算该分类的命令总数
+                const commandCount = Object.keys(categoryCommands).length;
+                totalCommands += commandCount;
+
+                if (commandCount === 0) {
+                    return; // 跳过空分类
+                }
+
+                // 初始化目标分类（如果不存在）
+                if (!userCommands[category]) {
+                    userCommands[category] = {};
+                    categoriesAdded.push(category);
+                }
+
+                if (!commandPositions[category]) {
+                    commandPositions[category] = {};
+                }
+
+                // 导入该分类下的所有命令（不覆盖，额外增加）
+                Object.keys(categoryCommands).forEach(commandId => {
+                    const command = categoryCommands[commandId];
+                    
+                    // 验证命令结构
+                    if (!command || !command.name) {
+                        console.warn(`跳过无效命令: ${commandId} in ${category}`);
+                        return;
+                    }
+
+                    // 生成新的命令ID以避免冲突
+                    const newCommandId = generateCommandId();
+                    
+                    // 确保命令使用新格式（兼容性处理）
+                    const migratedCommand = migrateCommandToNewFormat({
+                        ...command,
+                        id: newCommandId
+                    });
+
+                    // 添加命令到库中
+                    userCommands[category][newCommandId] = migratedCommand;
+
+                    // 为命令分配位置（如果没有位置信息）
+                    const availablePos = findFirstAvailablePosition(10, 4, commandPositions[category], Object.values(userCommands[category]));
+                    if (availablePos) {
+                        commandPositions[category][newCommandId] = availablePos;
+                    }
+
+                    importedCount++;
+                });
+            });
+
+            if (importedCount === 0) {
+                alert(`导入失败：项目文件 "${fileName}" 中没有有效的命令！\n\n可能的原因：\n1. 所有命令格式不正确\n2. 命令数据损坏\n\n请检查项目文件的完整性。`);
+                return;
+            }
+
+            // 确保所有命令都使用新格式
+            ensureCommandsNewFormat();
+
+            // 重新渲染界面
+            renderCommands();
+
+            // 更新项目状态
+            updateProjectUserCommands();
+            
+            // 更新标签计数
+            updateTabCounts();
+
+            // 显示导入结果
+            const categoryInfo = categoriesAdded.length > 0 ? 
+                `\n🆕 新增分类: ${categoriesAdded.join(', ')}` : '';
+            
+            const resultMessage = `✅ 命令导入成功！\n\n📄 项目文件：${fileName}\n📦 导入命令：${importedCount} 个\n📊 文件总命令：${totalCommands} 个${categoryInfo}\n\n💡 导入的命令已添加到您的命令库中，不会覆盖现有命令。`;
+            
+            alert(resultMessage);
+        }
+    </script>
+</body>
+</html>
