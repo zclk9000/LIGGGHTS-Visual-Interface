@@ -88,55 +88,165 @@
         }
         
         .btn {
+            background: white;
+            color: black;
+            border: 1px solid transparent;
+            border-radius: 6em;
+            padding: 0.5em 1.2em;
+            font-size: 16px;
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
         }
         
         .btn:hover {
-            transform: translateY(-1px);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
+        .btn:hover::before {
+            left: 100%;
         }
         
-        .btn-primary:hover {
-            background: #2563eb;
+        .btn:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         
-        .btn-gray {
-            background: #6b7280;
-            color: white;
-        }
-        
-        .btn-gray:hover {
-            background: #4b5563;
-        }
-        
-        .btn-green {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-green:hover {
-            background: #059669;
-        }
-        
+        /* 统一所有按钮样式 */
+        .btn-primary,
+        .btn-gray,
+        .btn-green,
         .btn-red {
-            background: #ef4444;
-            color: white;
+            background: white;
+            color: black;
+            border: 1px solid transparent;
+            border-radius: 6em;
+            padding: 0.5em 1.2em;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
         
+        .btn-primary::before,
+        .btn-gray::before,
+        .btn-green::before,
+        .btn-red::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover,
+        .btn-gray:hover,
+        .btn-green:hover,
         .btn-red:hover {
-            background: #dc2626;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary:hover::before,
+        .btn-gray:hover::before,
+        .btn-green:hover::before,
+        .btn-red:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:active,
+        .btn-gray:active,
+        .btn-green:active,
+        .btn-red:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* 特殊按钮样式统一 */
+        .btn-gray:nth-child(3),
+        #runBtn {
+            background: white !important;
+            color: black !important;
+            border: 1px solid transparent !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        
+        .btn-gray:nth-child(3):hover,
+        #runBtn:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+        }
+        
+        .btn-gray:nth-child(3):active,
+        #runBtn:active {
+            transform: translateY(-1px) scale(0.98) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+        }
+        
+        /* 暗色主题按钮样式 */
+        [data-theme="dark"] .btn,
+        [data-theme="dark"] .btn-primary,
+        [data-theme="dark"] .btn-gray,
+        [data-theme="dark"] .btn-green,
+        [data-theme="dark"] .btn-red {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+        
+        [data-theme="dark"] .btn::before,
+        [data-theme="dark"] .btn-primary::before,
+        [data-theme="dark"] .btn-gray::before,
+        [data-theme="dark"] .btn-green::before,
+        [data-theme="dark"] .btn-red::before {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+        
+        [data-theme="dark"] .btn:hover,
+        [data-theme="dark"] .btn-primary:hover,
+        [data-theme="dark"] .btn-gray:hover,
+        [data-theme="dark"] .btn-green:hover,
+        [data-theme="dark"] .btn-red:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        
+        /* 暗色主题特殊按钮 */
+        [data-theme="dark"] .btn-gray:nth-child(3),
+        [data-theme="dark"] #runBtn {
+            background: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-primary) !important;
+        }
+        
+        [data-theme="dark"] .btn-gray:nth-child(3):hover,
+        [data-theme="dark"] #runBtn:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4) !important;
         }
         
         .main-content {
@@ -1574,7 +1684,7 @@
         <div class="toolbar">
             <div class="toolbar-left">
                 <h1>LIGGGHTS 可视化界面</h1>
-                <button class="btn btn-primary">➕ 新建项目</button>
+                <button class="btn btn-primary">➕ 新建</button>
                 <button class="btn btn-gray">📁 打开</button>
                 <button class="btn btn-gray">💾 保存</button>
                 <button class="btn btn-primary" onclick="importCommands()">📦 导入命令</button>
@@ -1741,7 +1851,7 @@
         const translations = {
             zh: {
                 title: 'LIGGGHTS 可视化界面',
-                newProject: '➕ 新建项目',
+                newProject: '➕ 新建',
                 open: '📁 打开',
                 save: '💾 保存',
                 importCommands: '📦 导入命令',
