@@ -1399,6 +1399,59 @@
             font-style: italic;
         }
         
+        /* Markdown 表格样式 */
+        .markdown-preview-content .markdown-table,
+        .command-desc-rendered .markdown-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 12px 0;
+            font-size: 12px;
+            border: 1px solid var(--border-secondary);
+        }
+        
+        .markdown-preview-content .markdown-table th,
+        .markdown-preview-content .markdown-table td,
+        .command-desc-rendered .markdown-table th,
+        .command-desc-rendered .markdown-table td {
+            border: 1px solid var(--border-secondary);
+            padding: 6px 8px;
+            text-align: left;
+        }
+        
+        .markdown-preview-content .markdown-table th,
+        .command-desc-rendered .markdown-table th {
+            background-color: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .markdown-preview-content .markdown-table td,
+        .command-desc-rendered .markdown-table td {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .markdown-preview-content .markdown-table tr:nth-child(even) td,
+        .command-desc-rendered .markdown-table tr:nth-child(even) td {
+            background-color: var(--bg-tertiary);
+        }
+        
+        .markdown-preview-content .markdown-table tr:hover td,
+        .command-desc-rendered .markdown-table tr:hover td {
+            background-color: var(--bg-quaternary);
+        }
+        
+        /* 深色主题下的表格样式优化 */
+        [data-theme="dark"] .markdown-preview-content .markdown-table td,
+        [data-theme="dark"] .command-desc-rendered .markdown-table td {
+            background-color: var(--bg-tertiary); /* 所有单元格使用与表头相同的颜色 */
+        }
+        
+        [data-theme="dark"] .markdown-preview-content .markdown-table tr:nth-child(even) td,
+        [data-theme="dark"] .command-desc-rendered .markdown-table tr:nth-child(even) td {
+            background-color: var(--bg-tertiary); /* 间隔行也使用相同颜色，去掉斑马纹 */
+        }
+        
         /* 命令描述渲染样式 */
         .command-info {
             margin-bottom: 16px;
@@ -2257,6 +2310,9 @@
             html = html.replace(/(?<!\*)(\*)(?!\*)([^*]+)\1/g, '<em>$2</em>');
             html = html.replace(/(?<!_)(_)(?!_)([^_]+)\1/g, '<em>$2</em>');
             
+            // 处理表格
+            html = parseMarkdownTables(html);
+            
             // 处理列表项
             const lines = html.split('\n');
             let inList = false;
@@ -2305,13 +2361,172 @@
                 if (!paragraph) return '';
                 if (paragraph.startsWith('<h') || paragraph.startsWith('<ul') || 
                     paragraph.startsWith('<ol') || paragraph.startsWith('<pre') || 
-                    paragraph.startsWith('<blockquote')) {
+                    paragraph.startsWith('<blockquote') || paragraph.startsWith('<table')) {
                     return paragraph;
                 }
                 return `<p>${paragraph.replace(/\n/g, '<br>')}</p>`;
             }).filter(p => p).join('\n');
             
             return html;
+        }
+        
+        // 解析Markdown表格
+        function parseMarkdownTables(html) {
+            const lines = html.split('\n');
+            const processedLines = [];
+            let i = 0;
+            
+            while (i < lines.length) {
+                const line = lines[i];
+                
+                // 检测表格开始：包含 | 的行
+                if (line.includes('|') && line.trim() !== '') {
+                    const tableLines = [];
+                    let j = i;
+                    
+                    // 收集连续的表格行
+                    while (j < lines.length && lines[j].includes('|') && lines[j].trim() !== '') {
+                        tableLines.push(lines[j]);
+                        j++;
+                    }
+                    
+                    // 如果找到了表格行，处理表格
+                    if (tableLines.length >= 2) {
+                        const tableHtml = parseTableLines(tableLines);
+                        processedLines.push(tableHtml);
+                        i = j; // 跳过已处理的表格行
+                        continue;
+                    }
+                }
+                
+                // 不是表格行，直接添加
+                processedLines.push(line);
+                i++;
+            }
+            
+            return processedLines.join('\n');
+        }
+        
+        // 解析表格行并生成HTML
+        function parseTableLines(tableLines) {
+            if (tableLines.length < 2) return tableLines.join('\n');
+            
+            let html = '<table class="markdown-table">\n';
+            
+            // 解析第一行作为表头
+            const headerRow = tableLines[0];
+            const headerCells = parseTableRow(headerRow);
+            
+            // 检查第二行是否为分隔符行
+            const separatorRow = tableLines[1];
+            const isSeparatorRow = /^[\s\|:\-]+$/.test(separatorRow);
+            
+            if (isSeparatorRow && headerCells.length > 0) {
+                // 有表头的表格
+                html += '  <thead>\n    <tr>\n';
+                headerCells.forEach(cell => {
+                    html += `      <th>${cell.trim()}</th>\n`;
+                });
+                html += '    </tr>\n  </thead>\n';
+                
+                // 解析对齐方式
+                const alignments = parseTableAlignment(separatorRow);
+                
+                // 处理数据行
+                if (tableLines.length > 2) {
+                    html += '  <tbody>\n';
+                    for (let i = 2; i < tableLines.length; i++) {
+                        const dataCells = parseTableRow(tableLines[i]);
+                        if (dataCells.length > 0) {
+                            html += '    <tr>\n';
+                            dataCells.forEach((cell, index) => {
+                                const alignment = alignments[index] || 'left';
+                                const style = alignment !== 'left' ? ` style="text-align: ${alignment}"` : '';
+                                html += `      <td${style}>${cell.trim()}</td>\n`;
+                            });
+                            html += '    </tr>\n';
+                        }
+                    }
+                    html += '  </tbody>\n';
+                }
+            } else {
+                // 没有表头的简单表格
+                html += '  <tbody>\n';
+                tableLines.forEach(line => {
+                    const cells = parseTableRow(line);
+                    if (cells.length > 0) {
+                        html += '    <tr>\n';
+                        cells.forEach(cell => {
+                            html += `      <td>${cell.trim()}</td>\n`;
+                        });
+                        html += '    </tr>\n';
+                    }
+                });
+                html += '  </tbody>\n';
+            }
+            
+            html += '</table>';
+            return html;
+        }
+        
+        // 解析表格行，分割单元格
+        function parseTableRow(row) {
+            // 移除首尾的 | 并分割
+            const trimmed = row.trim();
+            let content = trimmed;
+            
+            // 移除开头和结尾的 |
+            if (content.startsWith('|')) {
+                content = content.substring(1);
+            }
+            if (content.endsWith('|')) {
+                content = content.substring(0, content.length - 1);
+            }
+            
+            // 分割单元格，处理转义的 |
+            const cells = [];
+            let currentCell = '';
+            let escaped = false;
+            
+            for (let i = 0; i < content.length; i++) {
+                const char = content[i];
+                
+                if (char === '\\' && !escaped) {
+                    escaped = true;
+                    continue;
+                }
+                
+                if (char === '|' && !escaped) {
+                    cells.push(currentCell);
+                    currentCell = '';
+                } else {
+                    currentCell += char;
+                }
+                
+                escaped = false;
+            }
+            
+            // 添加最后一个单元格
+            if (currentCell !== '' || content.endsWith('|')) {
+                cells.push(currentCell);
+            }
+            
+            return cells;
+        }
+        
+        // 解析表格对齐方式
+        function parseTableAlignment(separatorRow) {
+            const cells = parseTableRow(separatorRow);
+            return cells.map(cell => {
+                const trimmed = cell.trim();
+                if (trimmed.startsWith(':') && trimmed.endsWith(':')) {
+                    return 'center';
+                } else if (trimmed.endsWith(':')) {
+                    return 'right';
+                } else {
+                    return 'left';
+                }
+            });
         }
         
         // 格式化脚本行显示
