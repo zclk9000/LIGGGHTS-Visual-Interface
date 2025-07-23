@@ -255,8 +255,8 @@
             border: none;
             background: none;
             cursor: pointer;
-            font-size: 11px; /* 进一步减小字体 */
-            color: #6b7280;
+            font-size: 12px; /* 增大字体 */
+            color: var(--text-secondary); /* 使用主题色 */
             border-bottom: 2px solid transparent;
             white-space: nowrap;
             display: flex;
@@ -872,23 +872,65 @@
             display: none;
         }
         
-        /* 标签颜色定义 */
-        .tab-color-blue { color: #3b82f6; }
-        .tab-color-green { color: #10b981; }
-        .tab-color-purple { color: #8b5cf6; }
-        .tab-color-orange { color: #f59e0b; }
-        .tab-color-red { color: #ef4444; }
-        .tab-color-indigo { color: #6366f1; }
-        .tab-color-gray { color: #6b7280; }
+        /* 标签激活状态颜色 - 7种明显区分的颜色 */
+        .tab.active.tab-color-blue { 
+            color: #2563eb; 
+            font-weight: 600; 
+        }
+        .tab.active.tab-color-green { 
+            color: #059669; 
+            font-weight: 600; 
+        }
+        .tab.active.tab-color-purple { 
+            color: #7c3aed; 
+            font-weight: 600; 
+        }
+        .tab.active.tab-color-orange { 
+            color: #d97706; 
+            font-weight: 600; 
+        }
+        .tab.active.tab-color-red { 
+            color: #dc2626; 
+            font-weight: 600; 
+        }
+        .tab.active.tab-color-indigo { 
+            color: #0891b2; 
+            font-weight: 600; 
+        }
+        .tab.active.tab-color-gray { 
+            color: #6b7280; 
+            font-weight: 600; 
+        }
         
-        /* 激活状态下的颜色加深 */
-        .tab.active.tab-color-blue { color: #2563eb; font-weight: 600; }
-        .tab.active.tab-color-green { color: #059669; font-weight: 600; }
-        .tab.active.tab-color-purple { color: #7c3aed; font-weight: 600; }
-        .tab.active.tab-color-orange { color: #d97706; font-weight: 600; }
-        .tab.active.tab-color-red { color: #dc2626; font-weight: 600; }
-        .tab.active.tab-color-indigo { color: #4f46e5; font-weight: 600; }
-        .tab.active.tab-color-gray { color: #4b5563; font-weight: 600; }
+        /* 暗色模式下的激活状态颜色 */
+        [data-theme="dark"] .tab.active.tab-color-blue { 
+            color: #60a5fa; 
+            font-weight: 600; 
+        }
+        [data-theme="dark"] .tab.active.tab-color-green { 
+            color: #34d399; 
+            font-weight: 600; 
+        }
+        [data-theme="dark"] .tab.active.tab-color-purple { 
+            color: #a78bfa; 
+            font-weight: 600; 
+        }
+        [data-theme="dark"] .tab.active.tab-color-orange { 
+            color: #fbbf24; 
+            font-weight: 600; 
+        }
+        [data-theme="dark"] .tab.active.tab-color-red { 
+            color: #f87171; 
+            font-weight: 600; 
+        }
+        [data-theme="dark"] .tab.active.tab-color-indigo { 
+            color: #22d3ee; 
+            font-weight: 600; 
+        }
+        [data-theme="dark"] .tab.active.tab-color-gray { 
+            color: #9ca3af; 
+            font-weight: 600; 
+        }
         
         /* 步骤背景颜色 - 移除所有颜色，保持统一外观 */
         .step-init, 
