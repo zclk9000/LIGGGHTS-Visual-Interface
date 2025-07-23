@@ -188,8 +188,7 @@
         }
         
         /* 特殊按钮样式统一 */
-        .btn-gray:nth-child(3),
-        #runBtn {
+        .btn-gray:nth-child(3) {
             background: #f8f9fa !important;
             color: black !important;
             border: 1px solid transparent !important;
@@ -197,14 +196,12 @@
             overflow: hidden !important;
         }
         
-        .btn-gray:nth-child(3):hover,
-        #runBtn:hover {
+        .btn-gray:nth-child(3):hover {
             transform: translateY(-3px) !important;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
         }
         
-        .btn-gray:nth-child(3):active,
-        #runBtn:active {
+        .btn-gray:nth-child(3):active {
             transform: translateY(-1px) scale(0.98) !important;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
         }
@@ -237,15 +234,13 @@
         }
         
         /* 暗色主题特殊按钮 */
-        [data-theme="dark"] .btn-gray:nth-child(3),
-        [data-theme="dark"] #runBtn {
+        [data-theme="dark"] .btn-gray:nth-child(3) {
             background: var(--bg-tertiary) !important;
             color: var(--text-primary) !important;
             border: 1px solid var(--border-primary) !important;
         }
         
-        [data-theme="dark"] .btn-gray:nth-child(3):hover,
-        [data-theme="dark"] #runBtn:hover {
+        [data-theme="dark"] .btn-gray:nth-child(3):hover {
             box-shadow: 0 5px 15px rgba(0,0,0,0.4) !important;
         }
         
@@ -1747,7 +1742,6 @@
                 <button class="btn btn-gray" id="themeToggle" onclick="toggleTheme()">🌙 暗色</button>
                 <button class="btn btn-primary" onclick="importScript()">📥 导入脚本</button>
                 <button class="btn btn-green" onclick="exportScript()">⬇️ 导出脚本</button>
-                <button class="btn btn-green" id="runBtn">▶️ 运行</button>
             </div>
         </div>
 
@@ -1913,8 +1907,6 @@
                 themeLight: '☀️ 亮色',
                 importScript: '📥 导入脚本',
                 exportScript: '⬇️ 导出脚本',
-                run: '▶️ 运行',
-                stop: '⏸️ 停止',
                 searchPlaceholder: '搜索命令...',
                 commandDefinition: '命令定义',
                 paramConfig: '参数配置',
@@ -1965,8 +1957,6 @@
                 themeLight: '☀️ Light',
                 importScript: '📥 Import Script',
                 exportScript: '⬇️ Export Script',
-                run: '▶️ Run',
-                stop: '⏸️ Stop',
                 searchPlaceholder: 'Search commands...',
                 commandDefinition: 'Command Definition',
                 paramConfig: 'Parameter Configuration',
@@ -2038,7 +2028,6 @@
             
             document.querySelector('[onclick="importScript()"]').innerHTML = t('importScript');
             document.querySelector('[onclick="exportScript()"]').innerHTML = t('exportScript');
-            updateRunButton();
             
             // 更新搜索框
             document.getElementById('searchInput').placeholder = t('searchPlaceholder');
@@ -2113,15 +2102,7 @@
             });
         }
 
-        // 更新运行按钮
-        function updateRunButton() {
-            const runBtn = document.getElementById('runBtn');
-            if (runBtn.textContent.includes('运行') || runBtn.textContent.includes('Run')) {
-                runBtn.innerHTML = t('run');
-            } else {
-                runBtn.innerHTML = t('stop');
-            }
-        }
+
 
         // 更新空状态
         function updateEmptyStates() {
@@ -2239,7 +2220,6 @@
             ],
             '求解控制': [
                 { name: 'timestep', desc: '时间步长', params: ['dt'] },
-                { name: 'run', desc: '运行步数', params: ['N'] },
                 { name: 'minimize', desc: '能量最小化', params: ['etol', 'ftol', 'maxiter', 'maxeval'] },
                 { name: 'reset_timestep', desc: '重置时间步', params: ['N'] }
             ],
@@ -2255,8 +2235,7 @@
             'dimension': { dimension: { type: 'select', options: ['2', '3'], default: '3' } },
             'units': { units: { type: 'select', options: ['lj', 'real', 'metal', 'si', 'cgs'], default: 'si' } },
             'atom_style': { style: { type: 'select', options: ['atomic', 'sphere', 'granular'], default: 'granular' } },
-            'timestep': { dt: { type: 'number', default: '0.00001', step: '0.00001' } },
-            'run': { N: { type: 'number', default: '10000', step: '1000' } }
+            'timestep': { dt: { type: 'number', default: '0.00001', step: '0.00001' } }
         };
 
         // 全局状态
@@ -2968,7 +2947,6 @@
             const importCommandsBtn = document.querySelector('.btn-primary[onclick="importCommands()"]');
             const importScriptBtn = document.querySelector('.btn-primary[onclick="importScript()"]');
             const exportBtn = document.querySelector('.btn-green[onclick="exportScript()"]');
-            const runBtn = document.getElementById('runBtn');
             
             // 脚本区按钮状态（撤销按钮需要特殊处理）
             const insertBtn = document.querySelector('.btn-primary[onclick="insertNewLine()"]');
@@ -2982,7 +2960,7 @@
             
             if (hasProject) {
                 // 有项目时：启用所有功能（除了撤销按钮）
-                [saveBtn, importCommandsBtn, importScriptBtn, exportBtn, runBtn, insertBtn, clearBtn].forEach(btn => {
+                [saveBtn, importCommandsBtn, importScriptBtn, exportBtn, insertBtn, clearBtn].forEach(btn => {
                     if (btn) {
                         btn.disabled = false;
                         btn.style.opacity = '1';
@@ -3026,7 +3004,7 @@
                 
             } else {
                 // 无项目时：禁用大部分功能
-                [saveBtn, importCommandsBtn, importScriptBtn, exportBtn, runBtn, insertBtn, undoBtn, clearBtn].forEach(btn => {
+                [saveBtn, importCommandsBtn, importScriptBtn, exportBtn, insertBtn, undoBtn, clearBtn].forEach(btn => {
                     if (btn) {
                         btn.disabled = true;
                         btn.style.opacity = '0.4';
@@ -3242,16 +3220,7 @@
                 performCrossTabSearch(searchTerm);
             });
 
-            // 运行按钮
-            document.getElementById('runBtn').addEventListener('click', function() {
-                this.classList.toggle('btn-red');
-                this.classList.toggle('btn-green');
-                if (this.textContent.includes('运行')) {
-                    this.innerHTML = '⏸️ 停止';
-                } else {
-                    this.innerHTML = '▶️ 运行';
-                }
-            });
+
 
             // 项目管理按钮
             setupProjectButtons();
