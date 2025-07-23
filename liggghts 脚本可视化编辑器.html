@@ -247,40 +247,50 @@
             display: flex;
             background: #f9fafb;
             border-bottom: 1px solid #e5e5e5;
-            overflow-x: auto;
+            overflow-x: hidden; /* 移除滚动条 */
         }
         
         .tab {
-            padding: 12px 16px;
+            padding: 10px 12px; /* 减少内边距 */
             border: none;
             background: none;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px; /* 减小字体 */
             color: #6b7280;
             border-bottom: 2px solid transparent;
             white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px; /* 减少间距 */
             transition: all 0.2s;
             position: relative;
+            flex: 1; /* 让标签均分宽度 */
+            justify-content: center; /* 居中对齐 */
+            min-width: 0; /* 允许收缩 */
         }
         
         .tab-count {
             background: #e5e7eb;
             color: #6b7280;
-            font-size: 12px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            min-width: 18px;
+            font-size: 11px; /* 更小的字体 */
+            padding: 1px 4px; /* 减少内边距 */
+            border-radius: 8px; /* 更小的圆角 */
+            min-width: 16px; /* 更小的最小宽度 */
             text-align: center;
             line-height: 1.2;
-            margin-left: 4px;
+            margin-left: 2px; /* 减少外边距 */
+            flex-shrink: 0; /* 防止收缩 */
         }
         
         .tab.active .tab-count {
             background: #3b82f6;
             color: white;
+        }
+        
+        .tab.drag-hover {
+            background: #e0f2fe !important;
+            border-bottom-color: #0891b2 !important;
+            transform: scale(1.02);
         }
         
         .tab:hover {
@@ -453,10 +463,10 @@
         }
         
         .command-card.dragging {
-            z-index: 1000;
-            opacity: 0.8;
-            transform: rotate(3deg) scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 1000 !important;
+            opacity: 0.8 !important;
+            transform: rotate(2deg) scale(0.75) !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
         }
         
         .command-card:hover {
@@ -682,7 +692,7 @@
         .script-lines {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 1px;
         }
         
         .script-line {
@@ -690,14 +700,24 @@
             justify-content: space-between;
             align-items: center;
             background: #f9fafb;
-            padding: 8px 12px;
-            border-radius: 6px;
+            padding: 6px 12px;
+            border-radius: 0;
             font-family: 'Courier New', monospace;
             font-size: 13px;
             group: hover;
             cursor: move;
-            transition: all 0.2s ease;
-            position: relative;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .script-line:first-child {
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+        
+        .script-line:last-child {
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            border-bottom: none;
         }
         
         .script-line:hover {
@@ -847,30 +867,6 @@
             display: none;
         }
         
-        .step-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 8px 12px;
-            background: #f9fafb;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            font-size: 11px;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-        
         /* 颜色定义 */
         .color-blue { background: #3b82f6; }
         .color-green { background: #10b981; }
@@ -880,14 +876,17 @@
         .color-indigo { background: #6366f1; }
         .color-gray { background: #6b7280; }
         
-        /* 步骤背景颜色 */
-        .step-init { background: #eff6ff; }          /* 初始化设置 - 浅蓝色 */
-        .step-geometry { background: #f0fdf4; }      /* 几何定义 - 浅绿色 */
-        .step-material { background: #faf5ff; }      /* 材料属性 - 浅紫色 */
-        .step-particle { background: #fff7ed; }      /* 颗粒设置 - 浅橙色 */
-        .step-solver { background: #fef2f2; }        /* 求解控制 - 浅红色 */
-        .step-output { background: #eef2ff; }        /* 输出控制 - 浅靛蓝色 */
-        .step-other { background: #f3f4f6; }         /* 其它设置 - 浅灰色 */
+        /* 步骤背景颜色 - 移除所有颜色，保持统一外观 */
+        .step-init, 
+        .step-geometry, 
+        .step-material, 
+        .step-particle, 
+        .step-solver, 
+        .step-output, 
+        .step-other {
+            background: transparent;
+            color: inherit;
+        }
         
         /* 暗色主题额外样式 */
         [data-theme="dark"] .tabs {
@@ -913,6 +912,12 @@
             color: white;
         }
         
+        [data-theme="dark"] .tab.drag-hover {
+            background: #1e293b !important;
+            border-bottom-color: #0891b2 !important;
+            transform: scale(1.02);
+        }
+        
         [data-theme="dark"] .command-card {
             background: var(--bg-tertiary);
             border-color: var(--border-primary);
@@ -932,20 +937,12 @@
         [data-theme="dark"] .script-line {
             background: var(--bg-tertiary);
             color: var(--text-primary);
+            border-bottom: 1px solid var(--border-primary);
         }
         
         [data-theme="dark"] .script-line:hover {
             background: var(--bg-quaternary);
         }
-        
-        /* 暗色主题下的步骤颜色 */
-        [data-theme="dark"] .step-init { background: #1e3a8a; }      /* 深蓝色 */
-        [data-theme="dark"] .step-geometry { background: #166534; }  /* 深绿色 */
-        [data-theme="dark"] .step-material { background: #581c87; }  /* 深紫色 */
-        [data-theme="dark"] .step-particle { background: #9a3412; }  /* 深橙色 */
-        [data-theme="dark"] .step-solver { background: #991b1b; }    /* 深红色 */
-        [data-theme="dark"] .step-output { background: #3730a3; }    /* 深靛蓝色 */
-        [data-theme="dark"] .step-other { background: #4b5563; }     /* 深灰色 */
         
         [data-theme="dark"] .script-info {
             color: var(--text-secondary);
@@ -1129,15 +1126,6 @@
             background: #4b5563;
         }
         
-        [data-theme="dark"] .step-legend {
-            background: var(--bg-quaternary);
-            color: white;
-        }
-        
-        [data-theme="dark"] .legend-item {
-            color: white;
-        }
-
         /* 编辑状态下保持白色背景 */
         .script-line.editing {
             background: #fff !important;
@@ -1303,9 +1291,9 @@
 
                 <!-- 横向标签页 -->
                 <div class="tabs" id="tabs">
-                    <button class="tab active" data-category="初始化设置">
+                    <button class="tab active" data-category="初始设置">
                         <span class="tab-indicator color-blue"></span>
-                        初始化设置
+                        初始设置
                         <span class="tab-count">0</span>
                     </button>
                     <button class="tab" data-category="几何定义">
@@ -1465,21 +1453,13 @@
                 scriptEmpty: '脚本将在这里显示',
                 addAfterCommand: '添加命令后即可预览',
                 // 分类名称
-                initSettings: '初始化设置',
+                initSettings: '初始设置',
                 geometry: '几何定义',
                 materials: '材料属性',
                 particles: '颗粒设置',
                 solver: '求解控制',
                 output: '输出控制',
                 others: '其它设置',
-                // 步骤图例
-                init: '初始化',
-                geo: '几何',
-                mat: '材料',
-                part: '颗粒',
-                sol: '求解',
-                out: '输出',
-                other: '其它',
                 // 编辑器
                 newCommand: '新建命令',
                 editCommand: '编辑命令',
@@ -1529,14 +1509,6 @@
                 solver: 'Solver',
                 output: 'Output',
                 others: 'Others',
-                // 步骤图例
-                init: 'Init',
-                geo: 'Geom',
-                mat: 'Mater',
-                part: 'Parti',
-                sol: 'Solve',
-                out: 'Output',
-                other: 'Other',
                 // 编辑器
                 newCommand: 'New Command',
                 editCommand: 'Edit Command',
@@ -1620,7 +1592,7 @@
         // 更新标签页
         function updateTabs() {
             const categories = [
-                { key: 'initSettings', dataCategory: '初始化设置' },
+                { key: 'initSettings', dataCategory: '初始设置' },
                 { key: 'geometry', dataCategory: '几何定义' },
                 { key: 'materials', dataCategory: '材料属性' },
                 { key: 'particles', dataCategory: '颗粒设置' },
@@ -1643,7 +1615,7 @@
         
         // 更新标签计数
         function updateTabCounts() {
-            const categories = ['初始化设置', '几何定义', '材料属性', '颗粒设置', '求解控制', '输出控制', '其它设置'];
+            const categories = ['初始设置', '几何定义', '材料属性', '颗粒设置', '求解控制', '输出控制', '其它设置'];
             const tabs = document.querySelectorAll('.tab');
             
             categories.forEach((category, index) => {
@@ -1754,7 +1726,7 @@
 
         // 命令数据
         const commandCategories = {
-            '初始化设置': [
+            '初始设置': [
                 { name: 'dimension', desc: '设置维度', params: ['dimension'] },
                 { name: 'units', desc: '设置单位系统', params: ['units'] },
                 { name: 'atom_style', desc: '原子类型', params: ['style'] },
@@ -1800,7 +1772,7 @@
         };
 
         // 全局状态
-        let activeCategory = '初始化设置';
+        let activeCategory = '初始设置';
         let selectedCommand = null;
         let scriptLines = [];
         let parameters = {};
@@ -2289,12 +2261,12 @@
 
         // 命令步骤映射
         const commandStepMapping = {
-            // 初始化设置
-            'dimension': '初始化设置',
-            'units': '初始化设置',
-            'atom_style': '初始化设置',
-            'boundary': '初始化设置',
-            'newton': '初始化设置',
+            // 初始设置
+            'dimension': '初始设置',
+            'units': '初始设置',
+            'atom_style': '初始设置',
+            'boundary': '初始设置',
+            'newton': '初始设置',
             
             // 几何定义
             'region': '几何定义',
@@ -2326,7 +2298,7 @@
 
         // 步骤到CSS类的映射
         const stepToClassMapping = {
-            '初始化设置': 'step-init',
+            '初始设置': 'step-init',
             '几何定义': 'step-geometry',
             '材料属性': 'step-material',
             '颗粒设置': 'step-particle',
@@ -2385,7 +2357,7 @@
         // 获取命令的步骤
         function getCommandStep(commandLine) {
             if (!commandLine || typeof commandLine !== 'string') {
-                return '初始化设置'; // 默认步骤
+                return '初始设置'; // 默认步骤
             }
             
             const command = commandLine.trim().split(' ')[0];
@@ -2420,7 +2392,7 @@
                 }
             }
             
-            return '初始化设置'; // 默认步骤
+            return '初始设置'; // 默认步骤
         }
 
         // 初始化
@@ -2513,7 +2485,7 @@
             }
 
             const matchingCategories = [];
-            const allCategories = ['初始化设置', '几何定义', '材料属性', '颗粒设置', '求解控制', '输出控制', '其它设置'];
+            const allCategories = ['初始设置', '几何定义', '材料属性', '颗粒设置', '求解控制', '输出控制', '其它设置'];
             
             // 搜索所有分类中的命令
             allCategories.forEach(category => {
@@ -2699,6 +2671,9 @@
             }
             
             container.innerHTML = gridHTML;
+            
+            // 设置标签拖拽监听器
+            setupTabDragListeners();
         }
         
         // 找到第一个可用位置
@@ -2755,12 +2730,15 @@
         // 网格拖拽处理
         let draggedCommandId = null;
         let draggedFromPosition = null;
+        let draggedFromCategory = null; // 新增：记录源标签
+        let dragOverTabTimer = null; // 用于标签切换的计时器
 
         function handleCommandDragStart(event) {
             const commandCard = event.target.closest('.command-card');
             const gridCell = event.target.closest('.grid-cell');
             
             draggedCommandId = commandCard.dataset.commandId;
+            draggedFromCategory = activeCategory; // 记录源标签
             draggedFromPosition = {
                 row: parseInt(gridCell.dataset.row),
                 col: parseInt(gridCell.dataset.col)
@@ -2769,14 +2747,62 @@
             // 添加拖拽样式
             commandCard.classList.add('dragging');
             
+            // 创建一个极小的拖拽图像
+            const dragImage = document.createElement('div');
+            const commandName = commandCard.querySelector('.command-name')?.textContent || '命令';
+            
+            dragImage.style.cssText = `
+                position: fixed;
+                top: -1000px;
+                left: -1000px;
+                width: 80px;
+                height: 20px;
+                background: rgba(59, 130, 246, 0.8);
+                color: white;
+                font-size: 10px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 20px;
+                border-radius: 10px;
+                padding: 0 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                z-index: 9999;
+            `;
+            
+            dragImage.textContent = commandName;
+            
+            // 临时添加到页面中
+            document.body.appendChild(dragImage);
+            
             // 设置拖拽数据
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/html', commandCard.outerHTML);
+            event.dataTransfer.setData('application/json', JSON.stringify({
+                commandId: draggedCommandId,
+                fromCategory: draggedFromCategory,
+                fromPosition: draggedFromPosition
+            }));
+            
+            // 设置非常小的拖拽图像
+            event.dataTransfer.setDragImage(dragImage, 40, 10);
+            
+            // 延迟移除临时元素
+            setTimeout(() => {
+                if (dragImage.parentNode) {
+                    dragImage.parentNode.removeChild(dragImage);
+                }
+            }, 0);
             
             // 高亮所有可放置的区域
             document.querySelectorAll('.grid-cell').forEach(cell => {
                 cell.classList.add('drop-target');
             });
+            
+            // 添加标签拖拽监听
+            setupTabDragListeners();
         }
 
         function handleGridDragOver(event) {
@@ -2821,6 +2847,170 @@
             // 更新标签计数
             updateTabCounts();
         }
+        
+        // 查找空位置
+        function findEmptyPosition(category) {
+            const positions = commandPositions[category] || {};
+            const occupiedPositions = Object.values(positions);
+            
+            for (let row = 0; row < 10; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const isOccupied = occupiedPositions.some(pos => pos.row === row && pos.col === col);
+                    if (!isOccupied) {
+                        return { row, col };
+                    }
+                }
+            }
+            return null; // 没有空位置
+        }
+        
+        // 设置标签拖拽监听器
+        function setupTabDragListeners() {
+            // 移除所有现有的监听器
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.removeEventListener('dragover', handleTabDragOver, true);
+                tab.removeEventListener('dragleave', handleTabDragLeave, true);
+                tab.removeEventListener('drop', handleTabDrop, true);
+            });
+            
+            // 添加新的监听器，使用捕获模式
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('dragover', handleTabDragOver, true);
+                tab.addEventListener('dragleave', handleTabDragLeave, true);
+                tab.addEventListener('drop', handleTabDrop, true);
+            });
+        }
+        
+        // 标签拖拽悬停
+        function handleTabDragOver(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            if (!draggedCommandId) return;
+            
+            const tab = event.currentTarget;
+            const targetCategory = tab.dataset.category;
+            
+            // 如果不是当前标签且有拖拽的命令
+            if (targetCategory && targetCategory !== activeCategory) {
+                tab.classList.add('drag-hover');
+                
+                // 清除之前的计时器
+                if (dragOverTabTimer) {
+                    clearTimeout(dragOverTabTimer);
+                }
+                
+                // 设置新的计时器，800毫秒后切换标签
+                dragOverTabTimer = setTimeout(() => {
+                    if (targetCategory !== activeCategory) {
+                        switchTab(targetCategory);
+                        tab.classList.remove('drag-hover');
+                    }
+                }, 800);
+            }
+        }
+        
+        // 标签拖拽离开
+        function handleTabDragLeave(event) {
+            const tab = event.currentTarget;
+            tab.classList.remove('drag-hover');
+            
+            // 清除计时器
+            if (dragOverTabTimer) {
+                clearTimeout(dragOverTabTimer);
+                dragOverTabTimer = null;
+            }
+        }
+        
+        // 标签上的放置处理
+        function handleTabDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('标签拖拽放置事件触发');
+            console.log('draggedCommandId:', draggedCommandId);
+            console.log('draggedFromCategory:', draggedFromCategory);
+            
+            if (!draggedCommandId || !draggedFromCategory) return;
+            
+            const tab = event.currentTarget;
+            const targetCategory = tab.dataset.category;
+            
+            console.log('目标标签:', targetCategory);
+            
+            // 保存拖拽信息，防止被清理函数清除
+            const tempCommandId = draggedCommandId;
+            const tempFromCategory = draggedFromCategory;
+            
+            // 如果拖拽到不同的标签
+            if (targetCategory && targetCategory !== tempFromCategory) {
+                console.log('执行跨标签移动');
+                
+                // 先执行移动命令
+                moveCommandToCategory(tempCommandId, tempFromCategory, targetCategory);
+                
+                // 然后切换到目标标签
+                setTimeout(() => {
+                    switchTab(targetCategory);
+                }, 50);
+            } else {
+                console.log('同标签或无效目标，不执行移动');
+            }
+            
+            // 清理拖拽状态
+            cleanupDragState();
+        }
+        
+        // 移动命令到指定分类
+        function moveCommandToCategory(commandId, fromCategory, toCategory) {
+            console.log(`移动命令: ${commandId} 从 ${fromCategory} 到 ${toCategory}`);
+            
+            if (!userCommands[fromCategory] || !userCommands[fromCategory][commandId]) {
+                console.log('源命令不存在');
+                return;
+            }
+            
+            const command = userCommands[fromCategory][commandId];
+            console.log('找到命令:', command);
+            
+            // 删除源位置的数据
+            delete userCommands[fromCategory][commandId];
+            if (commandPositions[fromCategory]) {
+                delete commandPositions[fromCategory][commandId];
+            }
+            
+            // 在目标标签创建命令数据结构（如果不存在）
+            if (!userCommands[toCategory]) {
+                userCommands[toCategory] = {};
+            }
+            if (!commandPositions[toCategory]) {
+                commandPositions[toCategory] = {};
+            }
+            
+            // 找一个空位置放置命令
+            const emptyPosition = findEmptyPosition(toCategory);
+            if (emptyPosition) {
+                commandPositions[toCategory][commandId] = emptyPosition;
+                console.log('放置在空位置:', emptyPosition);
+            } else {
+                // 没有空位置，放在第一个位置
+                commandPositions[toCategory][commandId] = { row: 0, col: 0 };
+                console.log('放置在第一个位置');
+            }
+            
+            // 添加到目标标签
+            userCommands[toCategory][commandId] = command;
+            console.log('命令移动完成');
+            
+            // 重新渲染
+            renderCommands();
+            
+            // 更新项目状态
+            updateProjectUserCommands();
+            
+            // 更新标签计数
+            updateTabCounts();
+        }
 
         function cleanupDragState() {
             // 清除所有拖拽相关的样式
@@ -2832,8 +3022,27 @@
                 cell.classList.remove('drop-target', 'drop-invalid');
             });
             
+            // 清除标签拖拽样式
+            document.querySelectorAll('.tab.drag-hover').forEach(tab => {
+                tab.classList.remove('drag-hover');
+            });
+            
+            // 清除计时器
+            if (dragOverTabTimer) {
+                clearTimeout(dragOverTabTimer);
+                dragOverTabTimer = null;
+            }
+            
+            // 移除标签监听器
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.removeEventListener('dragover', handleTabDragOver, true);
+                tab.removeEventListener('dragleave', handleTabDragLeave, true);
+                tab.removeEventListener('drop', handleTabDrop, true);
+            });
+            
             draggedCommandId = null;
             draggedFromPosition = null;
+            draggedFromCategory = null;
         }
 
         // 监听拖拽结束事件
@@ -3190,36 +3399,6 @@
             }
 
             container.innerHTML = `
-                <div class="step-legend">
-                    <div class="legend-item">
-                        <div class="legend-color step-init"></div>
-                        <span>${t('init')}</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color step-geometry"></div>
-                        <span>${t('geo')}</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color step-material"></div>
-                        <span>${t('mat')}</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color step-particle"></div>
-                        <span>${t('part')}</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color step-solver"></div>
-                        <span>${t('sol')}</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color step-output"></div>
-                        <span>${t('out')}</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color step-other"></div>
-                        <span>${t('other')}</span>
-                    </div>
-                </div>
                 <div class="drag-hint" id="dragHint">
                     <span>⋮⋮</span>
                     <span>${t('dragHint')}</span>
@@ -3689,7 +3868,7 @@
             const newProjectName = name.trim();
             
             // 重置所有状态
-            activeCategory = '初始化设置';
+            activeCategory = '初始设置';
             selectedCommand = null;
             scriptLines = [];
             parameters = {};
@@ -3985,7 +4164,7 @@
             // 恢复项目状态
             currentProject = projectData;
             projectName = projectData.name;
-            activeCategory = projectData.activeCategory || '初始化设置';
+            activeCategory = projectData.activeCategory || '初始设置';
             selectedCommand = projectData.selectedCommand || null;
             scriptLines = [...(projectData.scriptLines || [])];
             parameters = {...(projectData.parameters || {})};
