@@ -524,6 +524,7 @@
             height: 56px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 16px;
             border-bottom: 1px solid var(--border-primary);
             background: var(--bg-secondary);
@@ -536,6 +537,50 @@
             font-weight: 600;
             color: var(--text-primary);
             transition: color 0.3s ease;
+        }
+        
+        .param-reset-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+        
+        .param-reset-btn:hover {
+            background: var(--bg-tertiary);
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .param-reset-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .reset-icon {
+            font-size: 16px;
+            transition: transform 0.6s ease;
+            display: inline-block;
+        }
+        
+        .param-reset-btn:hover .reset-icon {
+            transform: rotate(360deg);
+        }
+        
+        .param-reset-btn.spinning .reset-icon {
+            animation: spin 0.6s ease-in-out;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         
         .params-content {
@@ -1493,6 +1538,7 @@
         
         .param-dual-select .param-input {
             flex: 1;
+            width: 50%;
         }
         
         .examples-section {
@@ -1603,6 +1649,9 @@
             <div class="params-panel">
                 <div class="params-header">
                     <h2>参数配置</h2>
+                    <button class="param-reset-btn" id="paramResetBtn" onclick="clearAllDualParameters()" title="">
+                        <span class="reset-icon">🔄</span>
+                    </button>
                 </div>
                 <div class="params-content" id="paramsContent">
                     <div class="empty-state">
@@ -1740,7 +1789,8 @@
                 // 提示信息
                 dragHint: '拖拽脚本行可调整执行顺序 • 双击可编辑内容 • 不同颜色表示不同步骤',
                 createProjectFirst: '请先创建或打开一个项目',
-                needProjectToSave: '需要项目才能保存自定义命令'
+                needProjectToSave: '需要项目才能保存自定义命令',
+                clearParams: '清空所有参数'
             },
             en: {
                 title: 'LIGGGHTS Visual Interface',
@@ -1791,7 +1841,8 @@
                 // 提示信息
                 dragHint: 'Drag script lines to reorder • Double-click to edit • Different colors represent different steps',
                 createProjectFirst: 'Please create or open a project first',
-                needProjectToSave: 'Project required to save custom commands'
+                needProjectToSave: 'Project required to save custom commands',
+                clearParams: 'Clear all parameters'
             }
         };
 
@@ -1849,6 +1900,12 @@
             
             // 更新命令编辑器
             updateCommandEditor();
+            
+            // 更新重置按钮标题
+            const resetBtn = document.getElementById('paramResetBtn');
+            if (resetBtn) {
+                resetBtn.title = t('clearParams');
+            }
             
             // 重新渲染命令和脚本
             renderCommands();
@@ -3158,6 +3215,8 @@
             
             // 清空双参数状态（切换命令时重置）
             dualParameters = [];
+            originalDualParameters = [];
+            isParametersCleared = false; // 重置清空标记
             
             // 更新选中状态
             document.querySelectorAll('.command-card').forEach(card => {
@@ -3530,11 +3589,25 @@
                 
                 // 生成参数行表单
                 parameterRows.forEach((row, index) => {
-                    // 获取当前行的值，如果不存在则使用第一个可用选项作为默认值
+                    // 获取当前行的值
                     const defaultValue1 = (row.options1 && row.options1.length > 0) ? row.options1[0] : '';
                     const defaultValue2 = (row.options2 && row.options2.length > 0) ? row.options2[0] : '';
-                    const currentValue1 = (dualParameters[index] && dualParameters[index][0] !== '') ? dualParameters[index][0] : defaultValue1;
-                    const currentValue2 = (dualParameters[index] && dualParameters[index][1] !== '') ? dualParameters[index][1] : defaultValue2;
+                    
+                    // 如果参数被清空，显示空值；否则显示当前值或默认值
+                    let currentValue1, currentValue2;
+                    if (isParametersCleared) {
+                        // 参数被清空，显示空值
+                        currentValue1 = '';
+                        currentValue2 = '';
+                    } else if (dualParameters[index]) {
+                        // 有当前值，使用当前值
+                        currentValue1 = dualParameters[index][0];
+                        currentValue2 = dualParameters[index][1];
+                    } else {
+                        // 没有当前值，使用默认值
+                        currentValue1 = defaultValue1;
+                        currentValue2 = defaultValue2;
+                    }
                     
                     parameterFormHTML += `
                         <div class="param-group">
@@ -3544,13 +3617,13 @@
                                     ${(row.options1 || []).map(option => `
                                         <option value="${option}" ${currentValue1 === option ? 'selected' : ''}>${option}</option>
                                     `).join('')}
-                                    <option value="" ${currentValue1 === '' ? 'selected' : ''}>空白</option>
+                                    <option value="" ${currentValue1 === '' ? 'selected' : ''}></option>
                                 </select>
                                 <select class="param-input" onchange="updateDualParameter(${index}, 1, this.value)">
                                     ${(row.options2 || []).map(option => `
                                         <option value="${option}" ${currentValue2 === option ? 'selected' : ''}>${option}</option>
                                     `).join('')}
-                                    <option value="" ${currentValue2 === '' ? 'selected' : ''}>空白</option>
+                                    <option value="" ${currentValue2 === '' ? 'selected' : ''}></option>
                                 </select>
                             </div>
                         </div>
@@ -3644,6 +3717,27 @@
                     }
                 });
             }
+            
+            // 控制重置按钮的显示状态
+            updateResetButtonVisibility();
+        }
+        
+        // 控制重置按钮显示状态
+        function updateResetButtonVisibility() {
+            const resetBtn = document.getElementById('paramResetBtn');
+            if (resetBtn) {
+                // 只有在有选中命令且有参数时才显示重置按钮
+                const hasParameters = selectedCommand && 
+                    ((selectedCommand.parameterRows && selectedCommand.parameterRows.length > 0) ||
+                     (selectedCommand.params && selectedCommand.params.length > 0));
+                
+                if (hasParameters) {
+                    resetBtn.style.display = 'flex';
+                    resetBtn.style.opacity = '0.6';
+                } else {
+                    resetBtn.style.display = 'none';
+                }
+            }
         }
 
         // 更新参数
@@ -3653,6 +3747,8 @@
         
         // 双参数管理
         let dualParameters = [];
+        let originalDualParameters = []; // 存储原始参数状态
+        let isParametersCleared = false; // 标记参数是否被清空
         
         // 初始化双参数数组
         function initializeDualParameters(rowCount, parameterRows = []) {
@@ -3660,21 +3756,28 @@
             if (dualParameters.length !== rowCount) {
                 const oldParameters = [...dualParameters];
                 dualParameters = [];
+                originalDualParameters = []; // 同时初始化原始状态
                 
                 for (let i = 0; i < rowCount; i++) {
                     // 如果旧数组中有值，保留它，否则使用默认值
                     if (oldParameters[i]) {
                         dualParameters.push([...oldParameters[i]]);
+                        originalDualParameters.push([...oldParameters[i]]);
                     } else {
                         // 使用第一个可用选项作为默认值，如果没有选项则使用空字符串
                         const row = parameterRows[i];
                         const defaultValue1 = (row && row.options1 && row.options1.length > 0) ? row.options1[0] : '';
                         const defaultValue2 = (row && row.options2 && row.options2.length > 0) ? row.options2[0] : '';
                         dualParameters.push([defaultValue1, defaultValue2]); // [参数框1值, 参数框2值]
+                        originalDualParameters.push([defaultValue1, defaultValue2]); // 保存原始状态
                     }
                 }
                 
+                // 重置清空标记（只有在重新初始化时才重置）
+                isParametersCleared = false;
+                
                 console.log('初始化/更新参数数组:', dualParameters);
+                console.log('保存原始参数状态:', originalDualParameters);
             }
         }
         
@@ -3684,9 +3787,54 @@
                 // 确保 dualParameters 数组已正确初始化
                 dualParameters[rowIndex][selectIndex] = value;
                 
+                // 如果用户手动修改了参数，清除清空标记
+                if (isParametersCleared) {
+                    isParametersCleared = false;
+                    console.log('用户修改参数，清除清空标记');
+                }
+                
                 // 调试日志（可以在开发时查看）
                 console.log(`更新参数 [${rowIndex}][${selectIndex}] = "${value}"`);
                 console.log('当前所有参数:', dualParameters);
+            }
+        }
+        
+        // 清空所有双参数
+        function clearAllDualParameters() {
+            if (dualParameters.length === 0) return;
+            
+            // 添加旋转动画
+            const resetBtn = document.getElementById('paramResetBtn');
+            if (resetBtn) {
+                resetBtn.classList.add('spinning');
+                // 600ms 后移除动画类
+                setTimeout(() => {
+                    resetBtn.classList.remove('spinning');
+                }, 600);
+            }
+            
+            // 将所有参数设置为空
+            for (let i = 0; i < dualParameters.length; i++) {
+                dualParameters[i] = ['', ''];
+            }
+            
+            // 标记参数已被清空
+            isParametersCleared = true;
+            
+            // 重新渲染参数表单以显示空值
+            renderParameterForm();
+            
+            console.log('已清空所有参数:', dualParameters);
+        }
+        
+        // 恢复原始双参数（当重新选择命令时调用）
+        function restoreOriginalDualParameters() {
+            if (originalDualParameters.length > 0 && isParametersCleared) {
+                // 恢复到原始状态
+                dualParameters = originalDualParameters.map(param => [...param]);
+                isParametersCleared = false;
+                
+                console.log('恢复原始参数状态:', dualParameters);
             }
         }
         
