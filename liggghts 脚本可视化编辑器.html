@@ -147,8 +147,8 @@
         }
         
         .commands-panel {
-            flex: 1;
-            width: 33.333%;
+            flex: 0.3;
+            width: 30%;
             background: var(--bg-secondary);
             border-right: 1px solid var(--border-primary);
             display: flex;
@@ -251,34 +251,42 @@
         }
         
         .tab {
-            padding: 10px 12px; /* 减少内边距 */
+            padding: 8px 6px; /* 进一步减少内边距 */
             border: none;
             background: none;
             cursor: pointer;
-            font-size: 13px; /* 减小字体 */
+            font-size: 11px; /* 进一步减小字体 */
             color: #6b7280;
             border-bottom: 2px solid transparent;
             white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 6px; /* 减少间距 */
+            gap: 4px; /* 进一步减少间距 */
             transition: all 0.2s;
             position: relative;
             flex: 1; /* 让标签均分宽度 */
             justify-content: center; /* 居中对齐 */
             min-width: 0; /* 允许收缩 */
+            overflow: hidden; /* 防止内容溢出 */
+        }
+        
+        .tab-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex-shrink: 1;
         }
         
         .tab-count {
             background: #e5e7eb;
             color: #6b7280;
-            font-size: 11px; /* 更小的字体 */
-            padding: 1px 4px; /* 减少内边距 */
-            border-radius: 8px; /* 更小的圆角 */
-            min-width: 16px; /* 更小的最小宽度 */
+            font-size: 9px; /* 更小的字体 */
+            padding: 1px 3px; /* 进一步减少内边距 */
+            border-radius: 6px; /* 更小的圆角 */
+            min-width: 12px; /* 更小的最小宽度 */
             text-align: center;
-            line-height: 1.2;
-            margin-left: 2px; /* 减少外边距 */
+            line-height: 1.1;
+            margin-left: 1px; /* 进一步减少外边距 */
             flex-shrink: 0; /* 防止收缩 */
         }
         
@@ -316,11 +324,7 @@
             border-bottom-color: #f59e0b;
         }
         
-        .tab-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
+
         
         .commands-grid {
             flex: 1;
@@ -506,8 +510,8 @@
         }
         
         .params-panel {
-            flex: 1;
-            width: 33.333%;
+            flex: 0.3;
+            width: 30%;
             background: var(--bg-secondary);
             border-right: 1px solid var(--border-primary);
             display: flex;
@@ -639,8 +643,8 @@
         }
         
         .script-panel {
-            flex: 1;
-            width: 33.333%;
+            flex: 0.4;
+            width: 40%;
             background: var(--bg-secondary);
             display: flex;
             flex-direction: column;
@@ -699,14 +703,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #f9fafb;
-            padding: 6px 12px;
+            background: #f8f9fa;
+            padding: 8px 12px;
             border-radius: 0;
             font-family: 'Courier New', monospace;
             font-size: 13px;
             group: hover;
             cursor: move;
             border-bottom: 1px solid #e5e7eb;
+            line-height: 1.4;
         }
         
         .script-line:first-child {
@@ -721,7 +726,7 @@
         }
         
         .script-line:hover {
-            background: #f3f4f6;
+            background: #f1f3f4;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
@@ -867,14 +872,23 @@
             display: none;
         }
         
-        /* 颜色定义 */
-        .color-blue { background: #3b82f6; }
-        .color-green { background: #10b981; }
-        .color-purple { background: #8b5cf6; }
-        .color-orange { background: #f59e0b; }
-        .color-red { background: #ef4444; }
-        .color-indigo { background: #6366f1; }
-        .color-gray { background: #6b7280; }
+        /* 标签颜色定义 */
+        .tab-color-blue { color: #3b82f6; }
+        .tab-color-green { color: #10b981; }
+        .tab-color-purple { color: #8b5cf6; }
+        .tab-color-orange { color: #f59e0b; }
+        .tab-color-red { color: #ef4444; }
+        .tab-color-indigo { color: #6366f1; }
+        .tab-color-gray { color: #6b7280; }
+        
+        /* 激活状态下的颜色加深 */
+        .tab.active.tab-color-blue { color: #2563eb; font-weight: 600; }
+        .tab.active.tab-color-green { color: #059669; font-weight: 600; }
+        .tab.active.tab-color-purple { color: #7c3aed; font-weight: 600; }
+        .tab.active.tab-color-orange { color: #d97706; font-weight: 600; }
+        .tab.active.tab-color-red { color: #dc2626; font-weight: 600; }
+        .tab.active.tab-color-indigo { color: #4f46e5; font-weight: 600; }
+        .tab.active.tab-color-gray { color: #4b5563; font-weight: 600; }
         
         /* 步骤背景颜色 - 移除所有颜色，保持统一外观 */
         .step-init, 
@@ -891,6 +905,14 @@
         /* 暗色主题额外样式 */
         [data-theme="dark"] .tabs {
             background: var(--bg-tertiary);
+        }
+        
+        [data-theme="dark"] .script-line {
+            background: #2d3748;
+        }
+        
+        [data-theme="dark"] .script-line:hover {
+            background: #374151;
         }
         
         [data-theme="dark"] .tab {
@@ -1098,6 +1120,212 @@
             resize: vertical;
         }
         
+        /* Markdown 预览样式 */
+        .markdown-preview {
+            border: 1px solid var(--border-secondary);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            min-height: 120px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .markdown-preview-content h1,
+        .markdown-preview-content h2,
+        .markdown-preview-content h3,
+        .markdown-preview-content h4,
+        .markdown-preview-content h5,
+        .markdown-preview-content h6 {
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .markdown-preview-content h1 { font-size: 1.5em; }
+        .markdown-preview-content h2 { font-size: 1.3em; }
+        .markdown-preview-content h3 { font-size: 1.1em; }
+        .markdown-preview-content h4 { font-size: 1em; }
+        
+        .markdown-preview-content p {
+            margin: 8px 0;
+            color: var(--text-primary);
+        }
+        
+        .markdown-preview-content code {
+            background: var(--bg-tertiary);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: var(--text-primary);
+        }
+        
+        .markdown-preview-content pre {
+            background: var(--bg-tertiary);
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        
+        .markdown-preview-content pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .markdown-preview-content ul,
+        .markdown-preview-content ol {
+            margin: 8px 0;
+            padding-left: 20px;
+            color: var(--text-primary);
+        }
+        
+        .markdown-preview-content li {
+            margin: 4px 0;
+        }
+        
+        .markdown-preview-content blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 12px;
+            margin: 12px 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .markdown-preview-content strong {
+            font-weight: 600;
+        }
+        
+        .markdown-preview-content em {
+            font-style: italic;
+        }
+        
+        /* 命令描述渲染样式 */
+        .command-info {
+            margin-bottom: 16px;
+        }
+        
+        .command-info h3 {
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+        }
+        
+        .command-desc-rendered {
+            line-height: 1.5;
+            font-size: 12px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .command-desc-rendered.collapsed {
+            max-height: 120px;
+        }
+        
+        .command-desc-rendered.expanded {
+            max-height: none;
+        }
+        
+        .command-desc-toggle {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 4px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        
+        .command-desc-toggle:hover {
+            color: var(--text-secondary);
+        }
+        
+        .command-desc-toggle-icon {
+            margin-left: 4px;
+            transition: transform 0.2s;
+            font-size: 10px;
+        }
+        
+        .command-desc-toggle.expanded .command-desc-toggle-icon {
+            transform: rotate(180deg);
+        }
+        
+        .command-desc-rendered h1,
+        .command-desc-rendered h2,
+        .command-desc-rendered h3,
+        .command-desc-rendered h4,
+        .command-desc-rendered h5,
+        .command-desc-rendered h6 {
+            margin: 12px 0 6px 0;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .command-desc-rendered h1 { font-size: 1.1em; }
+        .command-desc-rendered h2 { font-size: 1.05em; }
+        .command-desc-rendered h3 { font-size: 1em; }
+        .command-desc-rendered h4 { font-size: 0.95em; }
+        
+        .command-desc-rendered p {
+            margin: 6px 0;
+            color: var(--text-primary);
+        }
+        
+        .command-desc-rendered code {
+            background: var(--bg-tertiary);
+            padding: 1px 3px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: var(--text-primary);
+        }
+        
+        .command-desc-rendered pre {
+            background: var(--bg-tertiary);
+            padding: 8px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+        
+        .command-desc-rendered pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .command-desc-rendered ul,
+        .command-desc-rendered ol {
+            margin: 6px 0;
+            padding-left: 16px;
+            color: var(--text-primary);
+        }
+        
+        .command-desc-rendered li {
+            margin: 2px 0;
+        }
+        
+        .command-desc-rendered blockquote {
+            border-left: 3px solid #3b82f6;
+            padding-left: 8px;
+            margin: 8px 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .command-desc-rendered strong {
+            font-weight: 600;
+        }
+        
+        .command-desc-rendered em {
+            font-style: italic;
+        }
+        
         .command-editor-btn {
             padding: 10px 20px;
             border: none;
@@ -1291,39 +1519,32 @@
 
                 <!-- 横向标签页 -->
                 <div class="tabs" id="tabs">
-                    <button class="tab active" data-category="初始设置">
-                        <span class="tab-indicator color-blue"></span>
-                        初始设置
+                    <button class="tab active tab-color-blue" data-category="初始设置">
+                        <span class="tab-text">初始设置</span>
                         <span class="tab-count">0</span>
                     </button>
-                    <button class="tab" data-category="几何定义">
-                        <span class="tab-indicator color-green"></span>
-                        几何定义
+                    <button class="tab tab-color-green" data-category="几何定义">
+                        <span class="tab-text">几何定义</span>
                         <span class="tab-count">0</span>
                     </button>
-                    <button class="tab" data-category="材料属性">
-                        <span class="tab-indicator color-purple"></span>
-                        材料属性
+                    <button class="tab tab-color-purple" data-category="材料属性">
+                        <span class="tab-text">材料属性</span>
                         <span class="tab-count">0</span>
                     </button>
-                    <button class="tab" data-category="颗粒设置">
-                        <span class="tab-indicator color-orange"></span>
-                        颗粒设置
+                    <button class="tab tab-color-orange" data-category="颗粒设置">
+                        <span class="tab-text">颗粒设置</span>
                         <span class="tab-count">0</span>
                     </button>
-                    <button class="tab" data-category="求解控制">
-                        <span class="tab-indicator color-red"></span>
-                        求解控制
+                    <button class="tab tab-color-red" data-category="求解控制">
+                        <span class="tab-text">求解控制</span>
                         <span class="tab-count">0</span>
                     </button>
-                    <button class="tab" data-category="输出控制">
-                        <span class="tab-indicator color-indigo"></span>
-                        输出控制
+                    <button class="tab tab-color-indigo" data-category="输出控制">
+                        <span class="tab-text">输出控制</span>
                         <span class="tab-count">0</span>
                     </button>
-                    <button class="tab" data-category="其它设置">
-                        <span class="tab-indicator color-gray"></span>
-                        其它设置
+                    <button class="tab tab-color-gray" data-category="其它设置">
+                        <span class="tab-text">其它设置</span>
                         <span class="tab-count">0</span>
                     </button>
                 </div>
@@ -1472,6 +1693,8 @@
                 cancel: '取消',
                 saveCmd: '保存',
                 addToScript: '生成并添加到脚本',
+                expandDesc: '展开描述',
+                collapseDesc: '收起描述',
                 // 提示信息
                 dragHint: '拖拽脚本行可调整执行顺序 • 双击可编辑内容 • 不同颜色表示不同步骤',
                 createProjectFirst: '请先创建或打开一个项目',
@@ -1521,6 +1744,8 @@
                 cancel: 'Cancel',
                 saveCmd: 'Save',
                 addToScript: 'Generate and Add to Script',
+                expandDesc: 'Expand description',
+                collapseDesc: 'Collapse description',
                 // 提示信息
                 dragHint: 'Drag script lines to reorder • Double-click to edit • Different colors represent different steps',
                 createProjectFirst: 'Please create or open a project first',
@@ -1605,7 +1830,7 @@
             categories.forEach((cat, index) => {
                 if (tabs[index]) {
                     const currentCount = tabs[index].querySelector('.tab-count')?.textContent || '0';
-                    tabs[index].innerHTML = `<span class="tab-indicator ${tabs[index].querySelector('.tab-indicator').className.split(' ')[1]}"></span>${t(cat.key)}<span class="tab-count">${currentCount}</span>`;
+                    tabs[index].innerHTML = `<span class="tab-text">${t(cat.key)}</span><span class="tab-count">${currentCount}</span>`;
                 }
             });
             
@@ -1687,6 +1912,8 @@
                     '请输入示例命令，每行一个\n例如：\nfix grav all gravity 9.81 vector 0 0 -1\nfix grav_x all gravity 5.0 vector 1 0 0' :
                     'Enter example commands, one per line\nFor example:\nfix grav all gravity 9.81 vector 0 0 -1\nfix grav_x all gravity 5.0 vector 1 0 0';
             }
+            
+
         }
 
         // 主题切换功能
@@ -1785,6 +2012,176 @@
         // 命令编辑器状态
         let currentEditingCommandId = null;
         let currentEditingPosition = null;
+        
+        // Markdown 解析和预览功能
+        function parseMarkdown(markdown) {
+            if (!markdown || markdown.trim() === '') {
+                return '<p style="color: #9ca3af; font-style: italic;">暂无描述</p>';
+            }
+            
+            let html = markdown;
+            
+            // 预处理：转义HTML特殊字符（除了我们要处理的markdown语法）
+            html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // 处理代码块 ```code``` （先处理，避免内容被其他规则影响）
+            html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            
+            // 处理行内代码 `code`
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // 处理标题 (# ## ### #### ##### ######)
+            html = html.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
+            html = html.replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>');
+            html = html.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
+            html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+            
+            // 处理引用 > text
+            html = html.replace(/^&gt;\s+(.+)$/gm, '<blockquote>$1</blockquote>');
+            
+            // 处理粗体 **text** 或 __text__
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
+            
+            // 处理斜体 *text* 或 _text_ (避免与列表冲突)
+            html = html.replace(/(?<!\*)(\*)(?!\*)([^*]+)\1/g, '<em>$2</em>');
+            html = html.replace(/(?<!_)(_)(?!_)([^_]+)\1/g, '<em>$2</em>');
+            
+            // 处理列表项
+            const lines = html.split('\n');
+            let inList = false;
+            let listType = '';
+            let processedLines = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const isUnorderedItem = /^[-*+]\s+(.+)$/.test(line);
+                const isOrderedItem = /^\d+\.\s+(.+)$/.test(line);
+                
+                if (isUnorderedItem || isOrderedItem) {
+                    const content = line.replace(/^[-*+\d.]\s+/, '');
+                    const currentListType = isUnorderedItem ? 'ul' : 'ol';
+                    
+                    if (!inList) {
+                        processedLines.push(`<${currentListType}>`);
+                        inList = true;
+                        listType = currentListType;
+                    } else if (listType !== currentListType) {
+                        processedLines.push(`</${listType}>`);
+                        processedLines.push(`<${currentListType}>`);
+                        listType = currentListType;
+                    }
+                    
+                    processedLines.push(`<li>${content}</li>`);
+                } else {
+                    if (inList) {
+                        processedLines.push(`</${listType}>`);
+                        inList = false;
+                        listType = '';
+                    }
+                    processedLines.push(line);
+                }
+            }
+            
+            if (inList) {
+                processedLines.push(`</${listType}>`);
+            }
+            
+            html = processedLines.join('\n');
+            
+            // 处理段落 - 双换行变成段落分隔
+            html = html.split('\n\n').map(paragraph => {
+                paragraph = paragraph.trim();
+                if (!paragraph) return '';
+                if (paragraph.startsWith('<h') || paragraph.startsWith('<ul') || 
+                    paragraph.startsWith('<ol') || paragraph.startsWith('<pre') || 
+                    paragraph.startsWith('<blockquote')) {
+                    return paragraph;
+                }
+                return `<p>${paragraph.replace(/\n/g, '<br>')}</p>`;
+            }).filter(p => p).join('\n');
+            
+            return html;
+        }
+        
+        // 格式化脚本行显示
+        function formatScriptLine(line) {
+            if (!line || line.trim() === '') {
+                return line;
+            }
+            
+            // 处理注释行
+            if (line.trim().startsWith('#')) {
+                return `<span style="color: #9ca3af;">${line}</span>`;
+            }
+            
+            // 查找行内注释的位置
+            const commentIndex = line.indexOf('#');
+            let mainPart = line;
+            let commentPart = '';
+            
+            if (commentIndex !== -1) {
+                mainPart = line.substring(0, commentIndex);
+                commentPart = line.substring(commentIndex);
+            }
+            
+            // 处理主要部分
+            const trimmedMain = mainPart.trim();
+            if (!trimmedMain) {
+                return commentPart ? `<span style="color: #9ca3af;">${commentPart}</span>` : line;
+            }
+            
+            // 分割第一个单词和其余部分
+            const words = trimmedMain.split(/\s+/);
+            if (words.length === 0) {
+                return commentPart ? `${line.substring(0, commentIndex)}<span style="color: #9ca3af;">${commentPart}</span>` : line;
+            }
+            
+            const firstWord = words[0];
+            const restWords = words.slice(1);
+            
+            // 构建格式化的行
+            let formatted = `<strong>${firstWord}</strong>`;
+            
+            if (restWords.length > 0) {
+                // 计算对齐空格 - 让后续内容对齐到固定位置
+                const alignmentSpaces = Math.max(1, 12 - firstWord.length);
+                formatted += `<span style="display: inline-block; width: ${alignmentSpaces * 0.6}em;"></span>`;
+                formatted += restWords.join(' ');
+            }
+            
+            // 添加注释部分（如果有）
+            if (commentPart) {
+                formatted += `<span style="color: #9ca3af; margin-left: 1em;">${commentPart}</span>`;
+            }
+            
+            return formatted;
+        }
+        
+        // 展开/收起命令描述
+        function toggleCommandDesc() {
+            const descElement = document.getElementById('commandDescRendered');
+            const toggleElement = document.querySelector('.command-desc-toggle');
+            
+            if (!descElement || !toggleElement) return;
+            
+            const isCollapsed = descElement.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                descElement.classList.remove('collapsed');
+                descElement.classList.add('expanded');
+                toggleElement.classList.add('expanded');
+                toggleElement.querySelector('span:first-child').textContent = t('collapseDesc');
+            } else {
+                descElement.classList.remove('expanded');
+                descElement.classList.add('collapsed');
+                toggleElement.classList.remove('expanded');
+                toggleElement.querySelector('span:first-child').textContent = t('expandDesc');
+            }
+        }
+
         
         // 显示添加命令编辑器
         function showAddCommandEditor(row, col) {
@@ -2408,8 +2805,10 @@
         function setupEventListeners() {
             // 标签切换
             document.getElementById('tabs').addEventListener('click', function(e) {
-                if (e.target.classList.contains('tab')) {
-                    switchTab(e.target.dataset.category);
+                // 查找最近的 .tab 父元素
+                const tabElement = e.target.closest('.tab');
+                if (tabElement) {
+                    switchTab(tabElement.dataset.category);
                 }
             });
 
@@ -3132,11 +3531,23 @@
                     `;
                 }
                 
+                // 渲染描述的 Markdown
+                const renderedDesc = parseMarkdown(selectedCommand.desc || '');
+                const hasLongDesc = (selectedCommand.desc || '').length > 100; // 判断是否需要展开/收起功能
+                
                 container.innerHTML = `
                     <div class="params-form">
                         <div class="command-info">
                             <h3>${selectedCommand.name}</h3>
-                            <p>${selectedCommand.desc}</p>
+                            <div class="command-desc-rendered ${hasLongDesc ? 'collapsed' : 'expanded'}" id="commandDescRendered">
+                                ${renderedDesc}
+                            </div>
+                            ${hasLongDesc ? `
+                                <div class="command-desc-toggle" onclick="toggleCommandDesc()">
+                                    <span>${t('expandDesc')}</span>
+                                    <span class="command-desc-toggle-icon">▼</span>
+                                </div>
+                            ` : ''}
                         </div>
                         ${parameterFormHTML}
                         ${examplesHTML}
@@ -3407,12 +3818,13 @@
                     ${scriptLines.map((line, index) => {
                         const step = getCommandStep(line);
                         const stepClass = stepToClassMapping[step] || 'step-init';
+                        const formattedLine = formatScriptLine(line);
                         return `
                             <div class="script-line ${stepClass}" draggable="true" data-index="${index}" data-step="${step}" ondblclick="editScriptLine(${index})">
                                 <div style="display: flex; align-items: center; flex: 1;">
                                     <span class="drag-handle">⋮⋮</span>
                                     <span class="line-number" style="color: #9ca3af; margin-right: 8px; font-size: 11px; min-width: 20px;">${index + 1}.</span>
-                                    <span class="line-content">${line}</span>
+                                    <span class="line-content">${formattedLine}</span>
                                 </div>
                                 <button class="delete-btn" data-index="${index}">×</button>
                             </div>
