@@ -73,6 +73,22 @@
             color: var(--text-primary);
             margin-right: 16px;
             transition: color 0.3s ease;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        
+        .toolbar h1 .app-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .toolbar h1 .project-name {
+            font-size: 14px;
+            font-weight: normal;
+            font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', 'Consolas', 'Courier New', monospace;
+            color: var(--text-secondary);
+            opacity: 0.8;
         }
         
         .toolbar-left {
@@ -243,6 +259,76 @@
         [data-theme="dark"] .btn-gray:nth-child(3):hover {
             box-shadow: 0 5px 15px rgba(0,0,0,0.4) !important;
         }
+        
+        /* 主题切换开关样式 */
+        .switch {
+            font-size: 17px;
+            position: relative;
+            display: inline-block;
+            width: 3.5em;
+            height: 2em;
+            margin: 0 8px;
+            vertical-align: middle;
+            transform: translateY(-1px);
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #f4f4f5;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 1.4em;
+            width: 1.4em;
+            border-radius: 20px;
+            left: 0.3em;
+            bottom: 0.3em;
+            background: linear-gradient(40deg,#ff0080,#ff8c00 70%);
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #303136;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(1.5em);
+            background: #303136;
+            box-shadow: inset -3px -2px 5px -2px #8983f7, inset -10px -5px 0 0 #a3dafb;
+        }
+
+        /* 开关悬停效果 */
+        .switch:hover .slider {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .switch:hover .slider:before {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .switch:hover input:checked + .slider:before {
+            box-shadow: inset -3px -2px 5px -2px #8983f7, inset -10px -5px 0 0 #a3dafb, 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+
         
         .main-content {
             display: flex;
@@ -1731,7 +1817,10 @@
         <!-- 顶部工具栏 -->
         <div class="toolbar">
             <div class="toolbar-left">
-                <h1>LIGGGHTS 可视化界面</h1>
+                <h1>
+                    <span class="app-title">LIGGGHTS 可视化界面</span>
+                    <span class="project-name" id="projectNameDisplay" style="display: none;"></span>
+                </h1>
                 <button class="btn btn-primary">➕ 新建</button>
                 <button class="btn btn-gray">📁 打开</button>
                 <button class="btn btn-gray">💾 保存</button>
@@ -1739,7 +1828,10 @@
             </div>
             <div class="toolbar-right">
                 <button class="btn btn-gray" id="languageToggle" onclick="toggleLanguage()">🌐 EN</button>
-                <button class="btn btn-gray" id="themeToggle" onclick="toggleTheme()">🌙 暗色</button>
+                <label class="switch" title="切换主题">
+                    <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                    <span class="slider"></span>
+                </label>
                 <button class="btn btn-primary" onclick="importScript()">📥 导入脚本</button>
                 <button class="btn btn-green" onclick="exportScript()">⬇️ 导出脚本</button>
             </div>
@@ -1913,6 +2005,7 @@
                 scriptPreview: '脚本预览',
                 insert: '➕ 插入',
                 undo: '↶ 撤销',
+                undoTitle: '撤销上次操作',
                 clear: '🗑️ 清空',
                 lines: '行',
                 selectCommand: '请从左侧选择一个命令开始配置',
@@ -1963,6 +2056,7 @@
                 scriptPreview: 'Script Preview',
                 insert: '➕ Insert',
                 undo: '↶ Undo',
+                undoTitle: 'Undo last operation',
                 clear: '🗑️ Clear',
                 lines: 'lines',
                 selectCommand: 'Please select a command from the left to start configuration',
@@ -2012,11 +2106,15 @@
 
         // 更新界面语言
         function updateLanguage() {
-            // 更新页面标题
-            document.title = t('title');
+            // 更新页面标题 - 考虑项目名
+            if (projectName) {
+                document.title = `${t('title')} - ${projectName}`;
+            } else {
+                document.title = t('title');
+            }
             
-            // 更新工具栏
-            document.querySelector('.toolbar h1').textContent = t('title');
+            // 更新工具栏标题 - 使用专门的函数
+            updateToolbarTitle();
             document.querySelector('.btn-primary').innerHTML = t('newProject');
             document.querySelectorAll('.btn-gray')[0].innerHTML = t('open');
             document.querySelectorAll('.btn-gray')[1].innerHTML = t('save');
@@ -2024,7 +2122,7 @@
             
             // 更新语言按钮
             document.getElementById('languageToggle').innerHTML = t('language');
-            updateThemeButton();
+            updateThemeToggle();
             
             document.querySelector('[onclick="importScript()"]').innerHTML = t('importScript');
             document.querySelector('[onclick="exportScript()"]').innerHTML = t('exportScript');
@@ -2044,6 +2142,8 @@
             // 更新脚本预览区域
             document.querySelector('.script-header h2').textContent = t('scriptPreview');
             document.querySelector('[onclick="insertNewLine()"]').innerHTML = t('insert');
+            document.getElementById('undoBtn').innerHTML = t('undo');
+            document.getElementById('undoBtn').title = t('undoTitle');
             document.querySelector('[onclick="clearScript()"]').innerHTML = t('clear');
             
             // 更新空状态文本
@@ -2164,7 +2264,7 @@
         // 初始化主题
         function initTheme() {
             document.documentElement.setAttribute('data-theme', currentTheme);
-            updateThemeButton();
+            updateThemeToggle();
         }
         
         // 切换主题
@@ -2172,20 +2272,18 @@
             currentTheme = currentTheme === 'light' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', currentTheme);
             localStorage.setItem('theme', currentTheme);
-            updateThemeButton();
+            updateThemeToggle();
         }
         
-        // 更新主题按钮文本
-        function updateThemeButton() {
+        // 更新主题开关状态
+        function updateThemeToggle() {
             const themeToggle = document.getElementById('themeToggle');
             if (themeToggle) {
-                if (currentTheme === 'dark') {
-                    themeToggle.innerHTML = t('themeLight');
-                } else {
-                    themeToggle.innerHTML = t('theme');
-                }
+                themeToggle.checked = currentTheme === 'dark';
             }
         }
+
+
         
         // 页面加载时初始化主题和语言
         document.addEventListener('DOMContentLoaded', function() {
@@ -5004,10 +5102,14 @@
                     const contents = await file.text();
                     const projectData = JSON.parse(contents);
                     
+                    // 从文件名提取项目名（去掉.json扩展名）
+                    const fileName = file.name;
+                    const projectNameFromFile = fileName.replace(/\.json$/i, '');
+                    
                     // 保存文件句柄以便后续保存
                     currentFileHandle = fileHandle;
                     
-                    loadProject(projectData);
+                    loadProject(projectData, projectNameFromFile);
                 } else {
                     // 浏览器不支持，使用传统方式
                     const input = document.createElement('input');
@@ -5018,13 +5120,17 @@
                     input.onchange = function(e) {
                         const file = e.target.files[0];
                         if (file) {
+                            // 从文件名提取项目名（去掉.json扩展名）
+                            const fileName = file.name;
+                            const projectNameFromFile = fileName.replace(/\.json$/i, '');
+                            
                             const reader = new FileReader();
                             reader.onload = function(e) {
                                 try {
                                     const projectData = JSON.parse(e.target.result);
                                     // 传统方式打开的文件无法获取句柄
                                     currentFileHandle = null;
-                                    loadProject(projectData);
+                                    loadProject(projectData, projectNameFromFile);
                                 } catch (error) {
                                     alert('项目文件格式错误！');
                                 }
@@ -5049,7 +5155,7 @@
         }
 
         // 加载项目
-        function loadProject(projectData) {
+        function loadProject(projectData, fileNameOverride = null) {
             // 验证项目数据
             if (!projectData.name) {
                 alert('项目文件格式错误：缺少项目名称！');
@@ -5058,7 +5164,8 @@
             
             // 恢复项目状态
             currentProject = projectData;
-            projectName = projectData.name;
+            // 优先使用文件名作为项目名，如果没有提供则使用JSON中的名称
+            projectName = fileNameOverride || projectData.name;
             activeCategory = projectData.activeCategory || '初始设置';
             selectedCommand = projectData.selectedCommand || null;
             scriptLines = [...(projectData.scriptLines || [])];
@@ -5102,9 +5209,15 @@
             
             // 根据是否有文件句柄显示不同的提示
             if (currentFileHandle) {
-                alert(`项目 "${projectName}" 加载成功！\n✅ 支持覆盖保存 - 点击保存按钮将直接更新原文件`);
+                const message = fileNameOverride ? 
+                    `项目 "${projectName}" 加载成功！\n📁 项目名基于文件名显示\n✅ 支持覆盖保存 - 点击保存按钮将直接更新原文件` :
+                    `项目 "${projectName}" 加载成功！\n✅ 支持覆盖保存 - 点击保存按钮将直接更新原文件`;
+                alert(message);
             } else {
-                alert(`项目 "${projectName}" 加载成功！\n⚠️ 不支持覆盖保存 - 点击保存按钮将下载新文件`);
+                const message = fileNameOverride ? 
+                    `项目 "${projectName}" 加载成功！\n📁 项目名基于文件名显示\n⚠️ 不支持覆盖保存 - 点击保存按钮将下载新文件` :
+                    `项目 "${projectName}" 加载成功！\n⚠️ 不支持覆盖保存 - 点击保存按钮将下载新文件`;
+                alert(message);
             }
         }
 
@@ -5129,11 +5242,20 @@
 
         // 更新工具栏标题
         function updateToolbarTitle() {
-            const title = document.querySelector('.toolbar h1');
+            const appTitle = document.querySelector('.toolbar h1 .app-title');
+            const projectNameDisplay = document.getElementById('projectNameDisplay');
+            
+            // 更新应用标题
+            if (appTitle) {
+                appTitle.textContent = t('title');
+            }
+            
+            // 更新项目名显示
             if (projectName) {
-                title.textContent = `LIGGGHTS 可视化界面 - ${projectName}`;
+                projectNameDisplay.textContent = `- ${projectName}`;
+                projectNameDisplay.style.display = 'inline';
             } else {
-                title.textContent = 'LIGGGHTS 可视化界面';
+                projectNameDisplay.style.display = 'none';
             }
         }
 
